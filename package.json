@@ -2,7 +2,11 @@
   "name": "result",
   "version": "0.1.0",
   "description": "reify your results",
-  "dependencies": {},
+  "dependencies": {
+    "inherit": "nathan7/inherit",
+    "next-tick": "timoxley/next-tick",
+    "result-core": "*"
+  },
   "devDependencies": {},
   "repository": {
     "type": "git",
