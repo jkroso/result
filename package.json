@@ -1,0 +1,17 @@
+{
+  "name": "result",
+  "version": "0.1.0",
+  "description": "reify your results",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jkroso/result.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jkroso/result/issues"
+  },
+  "keywords": ["result","computation","promise","future","thenable","reify"],
+  "author": "Jake Rosoman",
+  "license": "MIT"
+}

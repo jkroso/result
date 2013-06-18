@@ -1,0 +1,29 @@
+{
+  "name": "result",
+  "repo": "jkroso/result",
+  "description": "reify your results",
+  "version": "0.1.0",
+  "keywords": [
+    "result",
+    "computation",
+    "promise",
+    "future",
+    "thenable",
+    "reify"
+  ],
+  "dependencies": {
+    "timoxley/next-tick": "0.0.2",
+    "component/inherit": "0.0.2",
+    "jkroso/result-core": "1.0.0"
+  },
+  "development": {
+    "visionmedia/mocha": "1.11.0",
+    "jkroso/serve": "1.4.1",
+    "chaijs/chai": "1.7.0",
+    "chaijs/chai-spies": "0.5.1"
+  },
+  "scripts": [
+    "index.js"
+  ],
+  "license": "MIT"
+}
