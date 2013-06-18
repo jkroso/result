@@ -71,25 +71,25 @@ Result.prototype.write = function(value){
 }
 
 /**
- * break the Result
+ * put the Result into a failed state
  * 
- * @param  {Any} [e] the reason for rejection
- * @return {Self}
+ * @param  {x} reason
+ * @return {this}
  */
 
-Result.prototype.error = function(e){
+Result.prototype.error = function(reason){
 	if (this.state === 'pending') {
 		this.state = 'fail'
-		this.value = e
+		this.value = reason
 		var child = this[0]
 		var i = 1
 		if (child) {
 			do {
-				if (!child._onError) child.error(e)
-				else propagate(child, child._onError, e)
+				if (!child._onError) child.error(reason)
+				else propagate(child, child._onError, reason)
 			} while (child = this[i++])
 		} else {
-			Result.onError && Result.onError(this, e)
+			Result.onError && Result.onError(this, reason)
 		}
 	}
 	return this
