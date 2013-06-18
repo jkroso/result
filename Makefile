@@ -8,7 +8,7 @@ serve: node_modules
 	@node_modules/serve/bin/serve
 
 test: node_modules
-	@node_modules/mocha/bin/_mocha test/*.test.js \
+	@node_modules/mocha/bin/_mocha test/index.js \
 		--reporter $(REPORTER) \
 		--timeout 500 \
 		--check-leaks \
