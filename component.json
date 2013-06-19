@@ -2,7 +2,7 @@
   "name": "result",
   "repo": "jkroso/result",
   "description": "reify your results",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": [
     "result",
     "computation",
@@ -14,7 +14,7 @@
   "dependencies": {
     "timoxley/next-tick": "0.0.2",
     "component/inherit": "0.0.2",
-    "jkroso/result-core": "1.0.2"
+    "jkroso/result-type": "1.0.0"
   },
   "development": {
     "visionmedia/mocha": "1.11.0",

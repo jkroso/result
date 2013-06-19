@@ -1,14 +1,14 @@
 
-var Type = require('result-core/type')
+var ResType = require('result-type')
   , nextTick = require('next-tick')
   , inherit = require('inherit')
 
 module.exports = Result
-Result.type = Type
+Result.type = ResType
 Result.wrap = Result.done = wrap
 Result.failed = failed
 
-inherit(Result, Type)
+inherit(Result, ResType)
 
 function Result () {
 	this.i = 0
@@ -115,7 +115,7 @@ function propagate(child, fn, value){
 	catch (e) { return child.error(e) }
 
 	// auto lift one level
-	if (value instanceof Type) {
+	if (value instanceof ResType) {
 		return value.read(
 			function(val){ child.write(val) },
 			function(err){ child.error(err) }
@@ -170,7 +170,7 @@ function run(handler, value){
 		return result
 	}
 
-	if (result instanceof Type) {
+	if (result instanceof ResType) {
 		if (result instanceof Result) return result
 		return extract(result)
 	}
