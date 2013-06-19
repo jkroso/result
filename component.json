@@ -14,7 +14,7 @@
   "dependencies": {
     "timoxley/next-tick": "0.0.2",
     "component/inherit": "0.0.2",
-    "jkroso/result-core": "1.0.0"
+    "jkroso/result-core": "1.0.2"
   },
   "development": {
     "visionmedia/mocha": "1.11.0",
@@ -23,7 +23,8 @@
     "chaijs/chai-spies": "0.5.1"
   },
   "scripts": [
-    "index.js"
+    "index.js",
+    "lazy.js"
   ],
   "license": "MIT"
 }

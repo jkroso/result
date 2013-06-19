@@ -1,19 +1,25 @@
 
-var nextTick = require('next-tick')
-  , Spec = require('result-core')
+var Type = require('result-core/type')
+  , nextTick = require('next-tick')
   , inherit = require('inherit')
 
 module.exports = Result
-Result.type = Spec
-Result.wrap =
-Result.done = wrap
+Result.type = Type
+Result.wrap = Result.done = wrap
 Result.failed = failed
 
-inherit(Result, Spec)
+inherit(Result, Type)
 
 function Result () {
 	this.i = 0
 }
+
+/**
+ * default state
+ * @type {String}
+ */
+
+Result.prototype.state = 'pending'
 
 /**
  * Read the value of `this`
@@ -109,7 +115,7 @@ function propagate(child, fn, value){
 	catch (e) { return child.error(e) }
 
 	// auto lift one level
-	if (value instanceof Spec) {
+	if (value instanceof Type) {
 		return value.read(
 			function(val){ child.write(val) },
 			function(err){ child.error(err) }
@@ -164,7 +170,7 @@ function run(handler, value){
 		return result
 	}
 
-	if (result instanceof Spec) {
+	if (result instanceof Type) {
 		if (result instanceof Result) return result
 		return extract(result)
 	}
