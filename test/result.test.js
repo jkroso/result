@@ -77,4 +77,38 @@ describe('result', function(){
 			})
 		})
 	})
+
+	describe('unhandled errors', function(){
+		var onError = Result.onError
+		var onCatch = Result.onCatch
+		beforeEach(function(){
+			Result.onError = chai.spy()
+			Result.onCatch = chai.spy()
+		})
+		describe('when a Result enters the "fail" state without any readers', function(){
+			it('should call `Result.onError`', function(){
+				result.error(error)
+				Result.onError.should.have.been.called.with.exactly(result, error)
+				Result.onCatch.should.not.have.been.called
+			})
+		})
+		describe('when a Result in the "fail" state', function(){
+			describe('is `read` with an `onError` handler', function(){
+				it('call `Result.onCatch`', function(){
+					failed.read(null, spy)
+					spy.should.have.been.called
+					Result.onError.should.not.have.been.called
+					Result.onCatch.should.have.been.called.with.exactly(failed)
+				})
+			})
+			describe('is `then` with an `onError` handler', function(){
+				it('call `Result.onCatch`', function(){
+					failed.read(null, spy)
+					spy.should.have.been.called
+					Result.onError.should.not.have.been.called
+					Result.onCatch.should.have.been.called.with.exactly(failed)
+				})
+			})
+		})
+	})
 })

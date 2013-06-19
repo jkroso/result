@@ -94,9 +94,9 @@ Result.prototype.error = function(reason){
 				if (!child._onError) child.error(reason)
 				else propagate(child, child._onError, reason)
 			} while (child = this[i++])
-		} else {
-			Result.onError && Result.onError(this, reason)
+			return this
 		}
+		Result.onError && Result.onError(this, reason)
 	}
 	return this
 }
@@ -262,4 +262,39 @@ Result.prototype.node = function(fn){
 
 Result.prototype.yeild = function(value){
 	return this.then(function(){ return value })
+}
+
+/**
+ * Called when a Result enters the "fail" state without
+ * any readers to pass the `error` to
+ * 
+ * @param {Result} result
+ * @param {x} error
+ */
+
+Result.onError = function(result, error){
+	result._throw = setTimeout(function(){
+		if (error instanceof Error) {
+			error.message += ' (from a "failed" Result)'
+			throw error
+		}
+		if (typeof console == 'object') {
+			console.warn('%s (from a "failed" Result)', error)
+		}
+	}, 1000)
+}
+
+/**
+ * Called when a Result in "fail" state has `read`
+ * or `then` called with and `onError` handler i.e. 
+ * when a failed result is handled
+ * 
+ * @param {Result} result
+ */
+
+Result.onCatch = function(result){
+	if (result._throw !== undefined) {
+		clearTimeout(result._throw)
+		result._throw = undefined
+	}
 }
