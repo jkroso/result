@@ -7,6 +7,12 @@
 
   I just realized this takes a bit more explaining than I originally thought. I've probably not done a very good job of it either so please let me know where you get lost if you do so I can fix my explanation. I promise its worth learning. Oh and speaking of promises if this sounds a lot like a promise implementation thats because it is :). haha same concept but hopefully less nonsense.
 
+## Examples
+
+### async programming
+
+  the ultimate conclusion of this concept is actually right back where we started. i.e composing procedures by plonking them next to each other. [see](//github.com/jkroso/when/blob/master/examples/decorate.js) though in real usage it is pretty common to manipulate Results explicitly using `then` and `read`.
+
 ## TODO:
 
   create a completely unoptimized version for learners to read.
