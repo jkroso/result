@@ -1,5 +1,6 @@
 
 var ResType = require('result-type')
+  , unhandled = require('unhandled')
   , nextTick = require('next-tick')
   , inherit = require('inherit')
 
@@ -43,9 +44,9 @@ Result.prototype.read = function(onValue, onError){
 			onValue && onValue(this.value)
 			break
 		case 'fail':
-			Result.onCatch && Result.onCatch(this)
-			if (!onError) throw this.value
-			onError(this.value)
+			unhandled.remove(this.value)
+			if (onError) onError(this.value)
+			else thrower(this.value)
 	}
 	return this
 }
@@ -89,14 +90,11 @@ Result.prototype.error = function(reason){
 		this.value = reason
 		var child = this[0]
 		var i = 1
-		if (child) {
-			do {
-				if (!child._onError) child.error(reason)
-				else propagate(child, child._onError, reason)
-			} while (child = this[i++])
-			return this
-		}
-		Result.onError && Result.onError(this, reason)
+		if (child) do {
+			if (!child._onError) child.error(reason)
+			else propagate(child, child._onError, reason)
+		} while (child = this[i++])
+		else unhandled(reason)
 	}
 	return this
 }
@@ -145,11 +143,9 @@ Result.prototype.then = function(onValue, onError) {
 			if (onValue) return run(onValue, this.value) 
 			return wrap(this.value)
 		case 'fail':
-			if (onError) {
-				Result.onCatch && Result.onCatch(this)
-				return run(onError, this.value)
-			}
-			return failed(this.value)
+			if (!onError) return failed(this.value)
+			unhandled.remove(this.value)
+			return run(onError, this.value)
 	}
 }
 
@@ -164,11 +160,7 @@ Result.prototype.then = function(onValue, onError) {
 
 function run(handler, value){
 	try { var result = handler(value) } 
-	catch (e) { 
-		result = failed(e)
-		Result.onError && Result.onError(result, e)
-		return result
-	}
+	catch (e) { return failed(e) }
 
 	if (result instanceof ResType) {
 		if (result instanceof Result) return result
@@ -262,39 +254,4 @@ Result.prototype.node = function(fn){
 
 Result.prototype.yeild = function(value){
 	return this.then(function(){ return value })
-}
-
-/**
- * Called when a Result enters the "fail" state without
- * any readers to pass the `error` to
- * 
- * @param {Result} result
- * @param {x} error
- */
-
-Result.onError = function(result, error){
-	result._throw = setTimeout(function(){
-		if (error instanceof Error) {
-			error.message += ' (from a "failed" Result)'
-			throw error
-		}
-		if (typeof console == 'object') {
-			console.warn('%s (from a "failed" Result)', error)
-		}
-	}, 1000)
-}
-
-/**
- * Called when a Result in "fail" state has `read`
- * or `then` called with and `onError` handler i.e. 
- * when a failed result is handled
- * 
- * @param {Result} result
- */
-
-Result.onCatch = function(result){
-	if (result._throw !== undefined) {
-		clearTimeout(result._throw)
-		result._throw = undefined
-	}
 }

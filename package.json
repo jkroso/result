@@ -1,11 +1,12 @@
 {
   "name": "result",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "reify your results",
   "dependencies": {
     "inherit": "nathan7/inherit",
     "next-tick": "timoxley/next-tick",
-    "result-type": "1.0.0"
+    "result-type": "1.0.0",
+    "unhandled": "0.1.0"
   },
   "devDependencies": {},
   "repository": {
@@ -15,7 +16,14 @@
   "bugs": {
     "url": "https://github.com/jkroso/result/issues"
   },
-  "keywords": ["result","computation","promise","future","thenable","reify"],
+  "keywords": [
+    "result",
+    "computation",
+    "promise",
+    "future",
+    "thenable",
+    "reify"
+  ],
   "author": "Jake Rosoman",
   "license": "MIT"
 }

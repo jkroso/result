@@ -1,5 +1,6 @@
 
-var chai = require('./chai')
+var unhandled = require('unhandled')
+  , chai = require('./chai')
   , Result = require('..')
 
 function inc(n){
@@ -79,36 +80,28 @@ describe('result', function(){
 	})
 
 	describe('unhandled errors', function(){
-		var onError = Result.onError
-		var onCatch = Result.onCatch
-		beforeEach(function(){
-			Result.onError = chai.spy()
-			Result.onCatch = chai.spy()
+		afterEach(function(){
+			unhandled.remove(error)
 		})
-		describe('when a Result enters the "fail" state without any readers', function(){
-			it('should call `Result.onError`', function(){
-				result.error(error)
-				Result.onError.should.have.been.called.with.exactly(result, error)
-				Result.onCatch.should.not.have.been.called
-			})
+		it('should register when failing a promise without pending readers', function(){
+			result.error(error)
+			unhandled().should.eql([error])
 		})
-		describe('when a Result in the "fail" state', function(){
-			describe('is `read` with an `onError` handler', function(){
-				it('call `Result.onCatch`', function(){
-					failed.read(null, spy)
-					spy.should.have.been.called
-					Result.onError.should.not.have.been.called
-					Result.onCatch.should.have.been.called.with.exactly(failed)
-				})
+
+		it('should unregister when reading from a failed result', function(){
+			result.error(error)
+			result.read(null, function(e){
+				e.should.equal(error)
 			})
-			describe('is `then` with an `onError` handler', function(){
-				it('call `Result.onCatch`', function(){
-					failed.read(null, spy)
-					spy.should.have.been.called
-					Result.onError.should.not.have.been.called
-					Result.onCatch.should.have.been.called.with.exactly(failed)
-				})
+			unhandled().should.eql([])
+		})
+
+		it('should unregister when `then`ing from a failed result', function(){
+			result.error(error)
+			result.then(null, function(e){
+				e.should.equal(error)
 			})
+			unhandled().should.eql([])
 		})
 	})
 })
