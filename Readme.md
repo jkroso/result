@@ -27,7 +27,7 @@ then in your app:
 
 ```js
 var Result = require('result')
-var defer = require('result/lazy')
+var defer = require('result/defer')
 ```
 
 ## API
@@ -98,11 +98,7 @@ return result.then(function(value){
 
 ### defer(ƒ:Function)
 
-  create a DeferredResult which is associated with procedure `ƒ`.
-  `ƒ` will only be evaluated once someone actually reads from the
-  DeferredResult. `then` returns a normal Result so from there on
-  out you revert to eager evaluation. For a fully fledged lazy 
-  evaluation strategy [see](//github.com/jkroso/lazy-result).
+  create a DeferredResult which is associated with procedure `ƒ`. `ƒ` will only be evaluated only once someone actually reads from the DeferredResult. `then` returns a normal Result so from there on out you revert to eager evaluation. For a fully fledged lazy evaluation strategy [see](//github.com/jkroso/lazy-result).
 
 ```js
 var results = ['google.com', 'bing.com'].map(function(engine){
