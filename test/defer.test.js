@@ -1,5 +1,5 @@
 
-var defer = require('../lazy')
+var defer = require('../defer')
   , chai = require('./chai')
   , Result = require('..')
 
@@ -7,7 +7,7 @@ function inc(n){
 	return n + 1
 }
 
-describe('lazy', function(){
+describe('defer', function(){
 	var spy
 	beforeEach(function(){
 		spy = chai.spy()
