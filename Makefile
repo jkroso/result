@@ -1,5 +1,6 @@
 REPORTER=dot
-INSTALL=packin install --meta deps.json,component.json,package.json \
+INSTALL=packin install \
+	--meta package.json,component.json,deps.json \
 	--folder node_modules \
 	--executables \
 	--no-retrace
