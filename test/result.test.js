@@ -79,6 +79,14 @@ describe('result', function(){
 		})
 	})
 
+	describe('get()', function(){
+		it('should return a Result for a property', function(done){
+			Result.wrap({a:done}).get('a').then(function(done){
+				done()
+			})
+		})
+	})
+
 	describe('unhandled errors', function(){
 		afterEach(function(){
 			unhandled.remove(error)

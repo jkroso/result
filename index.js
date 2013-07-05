@@ -255,3 +255,16 @@ Result.prototype.node = function(fn){
 Result.prototype.yeild = function(value){
 	return this.then(function(){ return value })
 }
+
+/**
+ * return a Result for `this[attr]`
+ * 
+ * @param {String} attr
+ * @return {Result}
+ */
+
+Result.prototype.get = function(attr){
+	return this.then(function(obj){
+		return obj[attr]
+	})
+}
