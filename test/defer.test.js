@@ -66,6 +66,28 @@ describe('defer', function(){
 		})
 	})
 
+	describe('write()', function(){
+		it('should work even if the deferred has\'t been needed', function(done){
+			var result = defer(spy)
+			result.write(1)
+			result.read(function(){
+				spy.should.not.have.been.called
+				done()
+			})
+		})
+	})
+
+	describe('error()', function(){
+		it('should work even if the deferred has\'t been needed', function(done){
+			var result = defer(spy)
+			result.error(1)
+			result.read(null, function(){
+				spy.should.not.have.been.called
+				done()
+			})
+		})
+	})
+
 	describe('error handling', function(){
 		it('should catch sync errors', function(){
 			var error = new Error(this.test.title)

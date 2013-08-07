@@ -1,6 +1,8 @@
 
 var ResultType = require('result-type')
   , Result = require('./index')
+  , write = Result.prototype.write
+  , error = Result.prototype.error
   , then = Result.prototype.then
   , read = Result.prototype.read
   , inherit = require('inherit')
@@ -28,6 +30,8 @@ DeferredResult.prototype.i = 0
 DeferredResult.prototype.state = 'awaiting'
 DeferredResult.prototype.then = trigger(then)
 DeferredResult.prototype.read = trigger(read)
+DeferredResult.prototype.write = unawait(write)
+DeferredResult.prototype.error = unawait(error)
 
 function trigger(method){
 	return function(onValue, onError){
@@ -54,5 +58,12 @@ function trigger(method){
 			}
 		}
 		return method.call(this, onValue, onError)
+	}
+}
+
+function unawait(method){
+	return function(value){	
+		if (this.state === 'awaiting') this.state = 'pending'
+		return method.call(this, value)
 	}
 }
