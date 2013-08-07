@@ -7,15 +7,6 @@ function inc(n){
 	return n + 1
 }
 
-function delay(value){
-	var result = new Result
-	setTimeout(function () {
-		if (value instanceof Error) result.error(value)
-		else result.write(value)
-	}, Math.random() * 10)
-	return result
-}
-
 describe('result', function(){
 	var result
 	var failed

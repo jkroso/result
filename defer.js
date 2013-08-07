@@ -1,8 +1,9 @@
 
-var Result = require('./index')
-  , inherit = require('inherit')
+var ResultType = require('result-type')
+  , Result = require('./index')
   , then = Result.prototype.then
   , read = Result.prototype.read
+  , inherit = require('inherit')
 
 /**
  * create a DeferredResult which is associated with 
@@ -34,9 +35,20 @@ function trigger(method){
 			this.state = 'pending'
 			try {
 				var self = this 
-				this.ƒ(
-					function(val){ self.write(val) },
-					function(err){ self.error(err) })
+				if (this.ƒ.length) {
+					this.ƒ(
+						function(val){ self.write(val) },
+						function(err){ self.error(err) })
+				} else {
+					var val = this.ƒ()
+					if (val instanceof ResultType) {
+						val.read(
+							function(val){ self.write(val) },
+							function(err){ self.error(err) })
+					} else {
+						this.write(val)
+					}
+				}
 			} catch (e) {
 				this.error(e)
 			}

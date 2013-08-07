@@ -39,6 +39,22 @@ describe('defer', function(){
 				n.should.equal(2)
 			}).node(done)
 		})
+
+		it('accept return values', function(done){
+			defer(function(){
+				return delay(1)
+			}).then(function(val){
+				val.should.equal(1)
+			}).node(done)
+		})
+
+		it('should accept sync return values', function(done){
+			defer(function(){
+				return 1
+			}).then(function(val){
+				val.should.equal(1)
+			}).node(done)
+		})
 	})
 
 	describe('read()', function(){
@@ -57,6 +73,16 @@ describe('defer', function(){
 				throw error
 			}).then(null, spy)
 			spy.should.have.been.called.with(error)
+		})
+
+		it('should catch async errors', function(done){
+			var error = new Error(this.test.title)
+			defer(function(){
+				return delay(error)
+			}).then(null, function(e){
+				e.should.equal(error)
+				done()
+			})
 		})
 	})
 })
