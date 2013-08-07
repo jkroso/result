@@ -1,8 +1,6 @@
 
 var Result = require('./index')
   , inherit = require('inherit')
-  , write = Result.prototype.write
-  , error = Result.prototype.error
   , then = Result.prototype.then
   , read = Result.prototype.read
 
@@ -26,16 +24,14 @@ inherit(DeferredResult, Result)
 function DeferredResult(){}
 
 DeferredResult.prototype.i = 0
-DeferredResult.prototype.then = await(then)
-DeferredResult.prototype.read = await(read)
-DeferredResult.prototype.write = unAwait(write)
-DeferredResult.prototype.error = unAwait(error)
+DeferredResult.prototype.state = 'awaiting'
+DeferredResult.prototype.then = trigger(then)
+DeferredResult.prototype.read = trigger(read)
 
-function await(method){
+function trigger(method){
 	return function(onValue, onError){
-		var ret = method.call(this, onValue, onError)
-		if (this.state === 'pending') {
-			this.state = 'awaiting'
+		if (this.state === 'awaiting') {
+			this.state = 'pending'
 			try {
 				var self = this 
 				this.ƒ(
@@ -45,13 +41,6 @@ function await(method){
 				this.error(e)
 			}
 		}
-		return ret
-	}
-}
-
-function unAwait(method){
-	return function(value){
-		if (this.state === 'awaiting') this.state = 'pending'
-		return method.call(this, value)
+		return method.call(this, onValue, onError)
 	}
 }
