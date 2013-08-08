@@ -38,13 +38,13 @@ function trigger(method){
 		if (this.state === 'awaiting') {
 			this.state = 'pending'
 			try {
-				var self = this 
+				var self = this
+				var val 
 				if (this.ƒ.length) {
 					this.ƒ(
 						function(val){ self.write(val) },
 						function(err){ self.error(err) })
-				} else {
-					var val = this.ƒ()
+				} else if ((val = this.ƒ()) !== undefined) {
 					if (val instanceof ResultType) {
 						val.read(
 							function(val){ self.write(val) },

@@ -14,7 +14,7 @@ describe('defer', function(){
 	})
 
 	describe('then()', function(){
-		it('should execute `ƒ` if `this` is pending', function(){
+		it('should execute `ƒ` if `this` is "awaiting"', function(){
 			var result = defer(spy)
 			spy.should.not.have.been.called(1)
 			result.then()
@@ -40,25 +40,35 @@ describe('defer', function(){
 			}).node(done)
 		})
 
-		it('accept return values', function(done){
-			defer(function(){
-				return delay(1)
-			}).then(function(val){
-				val.should.equal(1)
-			}).node(done)
-		})
+		describe('return values', function(){
+			it('async', function(done){
+				defer(function(){
+					return delay(1)
+				}).then(function(val){
+					val.should.equal(1)
+				}).node(done)
+			})
 
-		it('should accept sync return values', function(done){
-			defer(function(){
-				return 1
-			}).then(function(val){
-				val.should.equal(1)
-			}).node(done)
+			it('sync', function(done){
+				defer(function(){
+					return 1
+				}).then(function(val){
+					val.should.equal(1)
+				}).node(done)
+			})
+
+			it('should not write `undefined`', function(){
+				var result = defer(function(){})
+				result.then(spy)
+				spy.should.not.be.called()
+				result.write(1)
+				spy.should.have.been.called.exactly(1)
+			})
 		})
 	})
 
 	describe('read()', function(){
-		it('should execute `ƒ` if `this` is pending', function(){
+		it('should execute `ƒ` if `this` is "awaiting"', function(){
 			var result = defer(spy)
 			spy.should.not.have.been.called(1)
 			result.read()

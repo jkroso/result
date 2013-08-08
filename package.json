@@ -1,6 +1,6 @@
 {
   "name": "result",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "reify your results",
   "dependencies": {
     "inherit": "http://github.com/nathan7/inherit/tarball/f1a75b4844",
