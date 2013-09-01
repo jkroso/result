@@ -18,7 +18,7 @@
     "jkroso/unhandled": "0.1.1"
   },
   "development": {
-    "visionmedia/mocha": "1.12.0",
+    "visionmedia/mocha": "1.12.1",
     "jkroso/result-core": "1.0.3",
     "chaijs/chai-spies": "0.5.1",
     "jkroso/serve": "1.5.0",
