@@ -6,7 +6,7 @@ INSTALL=packin install \
 	--no-retrace
 
 serve: node_modules
-	@node_modules/serve/bin/serve
+	@node_modules/serve/bin/serve -Sloj
 
 test: node_modules
 	@node_modules/mocha/bin/_mocha test/index.js \
@@ -19,7 +19,4 @@ node_modules: component.json
 	@$(INSTALL)
 	@cd node_modules/result-core && $(INSTALL)
 	
-clean:
-	rm -r node_modules
-
-.PHONY: clean serve test
+.PHONY: serve test

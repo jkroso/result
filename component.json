@@ -2,7 +2,7 @@
   "name": "result",
   "repo": "jkroso/result",
   "description": "reify your results",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "keywords": [
     "result",
     "computation",
@@ -21,7 +21,7 @@
     "visionmedia/mocha": "1.12.0",
     "jkroso/result-core": "1.0.3",
     "chaijs/chai-spies": "0.5.1",
-    "jkroso/serve": "1.4.6",
+    "jkroso/serve": "1.5.0",
     "chaijs/chai": "1.7.2"
   },
   "scripts": [
