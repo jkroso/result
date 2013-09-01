@@ -1,17 +1,17 @@
 
 var ResultType = require('result-type')
-  , Result = require('./index')
-  , write = Result.prototype.write
-  , error = Result.prototype.error
-  , then = Result.prototype.then
-  , read = Result.prototype.read
-  , inherit = require('inherit')
+var inherit = require('inherit')
+var Result = require('./index')
+var write = Result.prototype.write
+var error = Result.prototype.error
+var then = Result.prototype.then
+var read = Result.prototype.read
 
 /**
- * create a DeferredResult which is associated with 
- * procedure `ƒ`. `ƒ` will only be evaluated once 
+ * create a DeferredResult which is associated with
+ * procedure `ƒ`. `ƒ` will only be evaluated once
  * someone actually reads from the DeferredResult.
- * 
+ *
  * @param {Function} ƒ (write, error)
  * @return {DeferredResult}
  */
@@ -39,7 +39,7 @@ function trigger(method){
 			this.state = 'pending'
 			try {
 				var self = this
-				var val 
+				var val
 				if (this.ƒ.length) {
 					this.ƒ(
 						function(val){ self.write(val) },
@@ -62,7 +62,7 @@ function trigger(method){
 }
 
 function unawait(method){
-	return function(value){	
+	return function(value){
 		if (this.state === 'awaiting') this.state = 'pending'
 		return method.call(this, value)
 	}

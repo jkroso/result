@@ -1,17 +1,25 @@
 
+var ResultType = require('result-type')
 var unhandled = require('unhandled')
-  , chai = require('./chai')
-  , Result = require('..')
+var inherit = require('inherit')
+var chai = require('./chai')
+var Result = require('..')
+var coerce = Result.coerce
+var read = Result.read
 
 function inc(n){
 	return n + 1
 }
 
+var spy
+beforeEach(function(){
+	spy = chai.spy()
+})
+
 describe('result', function(){
 	var result
 	var failed
 	var value
-	var spy
 	var error
 	var test = 1
 	beforeEach(function(){
@@ -19,7 +27,6 @@ describe('result', function(){
 		error = new Error(test++)
 		failed = Result.failed(error)
 		value = Result.wrap(1)
-		spy = chai.spy()
 	})
 
 	describe('then()', function(){
@@ -102,5 +109,58 @@ describe('result', function(){
 			})
 			unhandled().should.eql([])
 		})
+	})
+})
+
+function Dummy(value){
+	this.read = function(onValue, onError){
+		if (value instanceof Error) onError(value)
+		else onValue(value)
+	}
+}
+
+inherit(Dummy, ResultType)
+
+describe('Result.read(value, onValue, onError)', function(){
+	it('should call the onValue function with the value', function(){
+		read(true, spy)
+		spy.should.have.been.called.with(true)
+	})
+
+	it('should handle "done" Results', function(){
+		read(new Result().write(1), spy)
+		spy.should.have.been.called.with(1)
+	})
+
+	it('should handle "failed" results', function(){
+		read(new Result().error(1), null, spy)
+		spy.should.have.been.called.with(1)
+	})
+
+	it('should handle funny Result instances', function(){
+		read(new Dummy(1), spy)
+		spy.should.have.been.called.with(1)
+		read(new Dummy(new Error(1)), null, spy)
+		spy.should.have.been.called.with(new Error(1))
+	})
+})
+
+describe('Result.coerce(value)', function(){
+	it('should return a trusted Result', function(){
+		coerce().should.be.an.instanceOf(Result)
+	})
+
+	it('should convert untrusted Results to trusted', function(){
+		coerce(new Dummy).should.be.an.instanceOf(Result)
+	})
+
+	it('should extract the value of the untrusted Result', function(){
+		coerce(new Dummy(1)).read(spy)
+		spy.should.have.been.called.with(1)
+	})
+
+	it('should extract the error an untrusted Result', function(){
+		coerce(new Dummy(new Error(1))).read(null, spy)
+		spy.should.have.been.called.with(new Error(1))
 	})
 })

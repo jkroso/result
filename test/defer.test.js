@@ -1,7 +1,7 @@
 
 var defer = require('../defer')
-  , chai = require('./chai')
-  , Result = require('..')
+var chai = require('./chai')
+var Result = require('..')
 
 function inc(n){
 	return n + 1

@@ -96,6 +96,15 @@ return result.then(function(value){
 
   wrap `value` in a "done" Result
 
+### read(value:x, onValue:Function, onError:Function)
+
+  read the value of `value` even if its
+  within a Result
+
+### coerce(value:x)
+
+  coerce `value` to a Result
+
 ### defer(ƒ:Function)
 
   create a DeferredResult which is associated with procedure `ƒ`. `ƒ` will only be evaluated only once someone actually reads from the DeferredResult. `then` returns a normal Result so from there on out you revert to eager evaluation. For a fully fledged lazy evaluation strategy [see](//github.com/jkroso/lazy-result).

@@ -1,15 +1,15 @@
 
-var ResType = require('result-type')
-  , unhandled = require('unhandled')
-  , nextTick = require('next-tick')
-  , inherit = require('inherit')
+var ResultType = require('result-type')
+var unhandled = require('unhandled')
+var nextTick = require('next-tick')
+var inherit = require('inherit')
 
 module.exports = Result
-Result.type = ResType
+Result.type = ResultType
 Result.wrap = Result.done = wrap
 Result.failed = failed
 
-inherit(Result, ResType)
+inherit(Result, ResultType)
 
 function Result () {
 	this.i = 0
@@ -24,7 +24,7 @@ Result.prototype.state = 'pending'
 
 /**
  * Read the value of `this`
- * 
+ *
  * @param  {Function} onValue
  * @param  {Function} onError
  * @return {this}
@@ -34,7 +34,7 @@ Result.prototype.read = function(onValue, onError){
 	switch (this.state) {
 		case 'pending':
 			this[this.i++] = {
-				// Handlers are bound to the assignment properties 
+				// Handlers are bound to the assignment properties
 				// since they aren't run inside a try catch.
 				write: onValue || noop,
 				error: onError || thrower
@@ -79,7 +79,7 @@ Result.prototype.write = function(value){
 
 /**
  * put the Result into a failed state
- * 
+ *
  * @param  {x} reason
  * @return {this}
  */
@@ -101,7 +101,7 @@ Result.prototype.error = function(reason){
 
 /**
  * Handle the processing of `child`
- * 
+ *
  * @param {Result} child
  * @param {Function} fn
  * @param {x} value
@@ -109,11 +109,11 @@ Result.prototype.error = function(reason){
  */
 
 function propagate(child, fn, value){
-	try { value = fn(value) } 
+	try { value = fn(value) }
 	catch (e) { return child.error(e) }
 
 	// auto lift one level
-	if (value instanceof ResType) {
+	if (value instanceof ResultType) {
 		return value.read(
 			function(val){ child.write(val) },
 			function(err){ child.error(err) }
@@ -126,7 +126,7 @@ function propagate(child, fn, value){
 /**
  * Create a Result for a transformation of the value
  * of `this` Result
- * 
+ *
  * @param  {Function} onValue
  * @param  {Function} onError
  * @return {Result}
@@ -140,7 +140,7 @@ Result.prototype.then = function(onValue, onError) {
 			result._onError = onError
 			return result
 		case 'done':
-			if (onValue) return run(onValue, this.value) 
+			if (onValue) return run(onValue, this.value)
 			return wrap(this.value)
 		case 'fail':
 			if (!onError) return failed(this.value)
@@ -152,17 +152,17 @@ Result.prototype.then = function(onValue, onError) {
 /**
  * run `value` through `handler` and ensure the result
  * is wrapped in a trusted Result
- * 
+ *
  * @param {Function} handler
  * @param {x} value
  * @api private
  */
 
 function run(handler, value){
-	try { var result = handler(value) } 
+	try { var result = handler(value) }
 	catch (e) { return failed(e) }
 
-	if (result instanceof ResType) {
+	if (result instanceof ResultType) {
 		if (result instanceof Result) return result
 		return extract(result)
 	}
@@ -171,7 +171,7 @@ function run(handler, value){
 
 /**
  * Convert to a trusted Result
- * 
+ *
  * @param {~Result} result
  * @return {Result}
  * @api private
@@ -189,7 +189,7 @@ function extract(result){
 
 /**
  * wrap `reason` in a "failed" result
- * 
+ *
  * @param {x} reason
  * @return {Result}
  * @api public
@@ -204,7 +204,7 @@ function failed(reason){
 
 /**
  * wrap `value` in a "done" Result
- * 
+ *
  * @param {x} value
  * @return {Result}
  * @api public
@@ -219,7 +219,7 @@ function wrap(value){
 
 /**
  * use the same `fn` for both `onValue` and `onError`
- * 
+ *
  * @param  {Function} fn
  * @return {Result}
  */
@@ -232,7 +232,7 @@ Result.prototype.always = function(fn){
  * read using a node style function
  *
  *   result.node(function(err, value){})
- * 
+ *
  * @param  {Function} callback(error, value)
  * @return {this}
  */
@@ -247,7 +247,7 @@ Result.prototype.node = function(fn){
  *   return result.then(function(value){
  *     // something side effect
  *   }).yeild(e)
- * 
+ *
  * @param  {x} value
  * @return {Result}
  */
@@ -258,7 +258,7 @@ Result.prototype.yeild = function(value){
 
 /**
  * return a Result for `this[attr]`
- * 
+ *
  * @param {String} attr
  * @return {Result}
  */
@@ -267,4 +267,37 @@ Result.prototype.get = function(attr){
 	return this.then(function(obj){
 		return obj[attr]
 	})
+}
+
+/**
+ * read the value of `value` even if its
+ * within a Result
+ *
+ * @param {x} value
+ * @param {Function} onValue
+ * @param {Function} onError
+ */
+
+Result.read = function(value, onValue, onError){
+	if (value instanceof ResultType) value.read(onValue, onError)
+	else onValue(value)
+}
+
+/**
+ * coerce `value` to a Result
+ *
+ * @param {x} value
+ * @return {Result}
+ */
+
+Result.coerce = function(value){
+	if (value instanceof ResultType) {
+		if (value instanceof Result) return value
+		var result = new Result
+		value.read(
+			function(v){ result.write(v) },
+			function(e){ result.error(e) })
+		return result
+	}
+	return wrap(value)
 }
