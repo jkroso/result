@@ -4,16 +4,19 @@ var unhandled = require('unhandled')
 var nextTick = require('next-tick')
 var inherit = require('inherit')
 
-module.exports = Result
-Result.type = ResultType
-Result.wrap = Result.done = wrap
-Result.failed = failed
-
-inherit(Result, ResultType)
+/**
+ * the Result class
+ */
 
 function Result () {
 	this.i = 0
 }
+
+/**
+ * inherit from ResultType
+ */
+
+inherit(Result, ResultType)
 
 /**
  * default state
@@ -301,3 +304,8 @@ Result.coerce = function(value){
 	}
 	return wrap(value)
 }
+
+Result.wrap = Result.done = wrap
+Result.failed = failed
+
+module.exports = Result
