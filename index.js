@@ -8,7 +8,7 @@ var inherit = require('inherit')
  * the Result class
  */
 
-function Result () {
+function Result(){
 	this.i = 0
 }
 
