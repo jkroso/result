@@ -16,7 +16,7 @@ beforeEach(function(){
 	spy = chai.spy()
 })
 
-describe('result', function(){
+describe('Result', function(){
 	var result
 	var failed
 	var value
@@ -29,10 +29,60 @@ describe('result', function(){
 		value = Result.wrap(1)
 	})
 
-	describe('then()', function(){
+	describe('.read()', function(){
+		describe('context for functions', function(){
+			it('when "done"', function(done){
+				value.read(function(){
+					value.should.equal(this)
+					failed.read(null, function(){
+						failed.should.equal(this)
+						done()
+					})
+				})
+			})
+
+			it('when "pending"', function(done){
+				result.read(function(){
+					result.should.equal(this)
+					var fail = new Result
+					fail.read(null, function(){
+						fail.should.equal(this)
+						done()
+					}).error(error)
+				}).write(1)
+			})
+		})
+	})
+
+	describe('.then()', function(){
 		it('should return a new Result based of `this`', function(){
 			value.then(inc).read(spy)
 			spy.should.have.been.called.with(2)
+		})
+
+		describe('context for functions', function(){
+			it('when "done"', function(done){
+				value.then(function(){
+					value.should.equal(this)
+					failed.then(null, function(){
+						failed.should.equal(this)
+						done()
+					})
+				})
+			})
+
+			it('when "pending"', function(done){
+				result.then(function(){
+					result.should.equal(this)
+					var fail = new Result
+					fail.then(null, function(){
+						fail.should.equal(this)
+						done()
+					})
+					fail.error(error)
+				})
+				result.write(1)
+			})
 		})
 
 		describe('error handling', function(){
@@ -77,7 +127,7 @@ describe('result', function(){
 		})
 	})
 
-	describe('get()', function(){
+	describe('.get()', function(){
 		it('should return a Result for a property', function(done){
 			Result.wrap({a:done}).get('a').then(function(done){
 				done()

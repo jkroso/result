@@ -36,28 +36,39 @@ Result.prototype.state = 'pending'
 Result.prototype.read = function(onValue, onError){
 	switch (this.state) {
 		case 'pending':
-			this[this.i++] = {
-				// Handlers are bound to the assignment properties
-				// since they aren't run inside a try catch.
-				write: onValue || noop,
-				error: onError || thrower
-			}
+			this[this.i++] = new Reader(onValue, onError)
 			break
 		case 'done':
-			onValue && onValue(this.value)
+			onValue && onValue.call(this, this.value)
 			break
 		case 'fail':
 			unhandled.remove(this.value)
-			if (onError) onError(this.value)
+			if (onError) onError.call(this, this.value)
 			else thrower(this.value)
 	}
 	return this
 }
 
+/**
+ * a dummy result with noop write/error methods so
+ * reads can be handled the same way as thens
+ * internally
+ *
+ * @param {Function} onValue
+ * @param {Function} onError
+ * @api private
+ */
+
+function Reader(onValue, onError){
+	this._onValue = onValue
+	this._onError = onError
+}
+
+Reader.prototype.write = function(){}
+Reader.prototype.error = thrower
 function thrower(e){
 	nextTick(function(){ throw e })
 }
-function noop(){}
 
 /**
  * Give the Result it's value
@@ -73,8 +84,11 @@ Result.prototype.write = function(value){
 		var child
 		var i = 0
 		while (child = this[i++]) {
-			if (!child._onValue) child.write(value)
-			else propagate(child, child._onValue, value)
+			if (child._onValue) {
+				propagate.call(this, child, child._onValue, value)
+			} else {
+				child.write(value)
+			}
 		}
 	}
 	return this
@@ -93,11 +107,17 @@ Result.prototype.error = function(reason){
 		this.value = reason
 		var child = this[0]
 		var i = 1
-		if (child) do {
-			if (!child._onError) child.error(reason)
-			else propagate(child, child._onError, reason)
+		if (!child) {
+			unhandled(reason)
+			return this
+		}
+		do {
+			if (child._onError) {
+				propagate.call(this, child, child._onError, reason)
+			} else {
+				child.error(reason)
+			}
 		} while (child = this[i++])
-		else unhandled(reason)
 	}
 	return this
 }
@@ -112,7 +132,7 @@ Result.prototype.error = function(reason){
  */
 
 function propagate(child, fn, value){
-	try { value = fn(value) }
+	try { value = fn.call(this, value)}
 	catch (e) { return child.error(e) }
 
 	// auto lift one level
@@ -143,12 +163,12 @@ Result.prototype.then = function(onValue, onError) {
 			result._onError = onError
 			return result
 		case 'done':
-			if (onValue) return run(onValue, this.value)
+			if (onValue) return run(onValue, this.value, this)
 			return wrap(this.value)
 		case 'fail':
 			if (!onError) return failed(this.value)
 			unhandled.remove(this.value)
-			return run(onError, this.value)
+			return run(onError, this.value, this)
 	}
 }
 
@@ -158,11 +178,12 @@ Result.prototype.then = function(onValue, onError) {
  *
  * @param {Function} handler
  * @param {x} value
+ * @param {Any} ctx
  * @api private
  */
 
-function run(handler, value){
-	try { return coerce(handler(value)) }
+function run(handler, value, ctx){
+	try { return coerce(handler.call(ctx, value)) }
 	catch (e) { return failed(e) }
 }
 
@@ -201,6 +222,7 @@ function wrap(value){
  *
  * @param {x} value
  * @return {Result}
+ * @api public
  */
 
 function coerce(value){
@@ -243,7 +265,7 @@ Result.prototype.node = function(fn){
  * Create a child Result destined to fulfill with `value`
  *
  *   return result.then(function(value){
- *     // something side effect
+ *     // some side effect
  *   }).yeild(e)
  *
  * @param  {x} value
