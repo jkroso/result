@@ -1,6 +1,6 @@
 {
   "name": "result",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "description": "reify your results",
   "dependencies": {
     "inherit": "http://github.com/nathan7/inherit/tarball/f1a75b4844",
@@ -8,7 +8,6 @@
     "result-type": "1.0.0",
     "unhandled": "0.1.1"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git://github.com/jkroso/result.git"
