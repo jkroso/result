@@ -162,32 +162,8 @@ Result.prototype.then = function(onValue, onError) {
  */
 
 function run(handler, value){
-	try { var result = handler(value) }
+	try { return coerce(handler(value)) }
 	catch (e) { return failed(e) }
-
-	if (result instanceof ResultType) {
-		if (result instanceof Result) return result
-		return extract(result)
-	}
-	return wrap(result)
-}
-
-/**
- * Convert to a trusted Result
- *
- * @param {~Result} result
- * @return {Result}
- * @api private
- */
-
-function extract(result){
-	var trusted = new Result
-	result.read(function(value){
-		trusted.write(value)
-	}, function(reason){
-		trusted.error(reason)
-	})
-	return trusted
 }
 
 /**
@@ -218,6 +194,25 @@ function wrap(value){
 	res.value = value
 	res.state = 'done'
 	return res
+}
+
+/**
+ * coerce `value` to a Result
+ *
+ * @param {x} value
+ * @return {Result}
+ */
+
+function coerce(value){
+	if (value instanceof ResultType) {
+		if (value instanceof Result) return value
+		var result = new Result
+		value.read(
+			function(v){ result.write(v) },
+			function(e){ result.error(e) })
+		return result
+	}
+	return wrap(value)
 }
 
 /**
@@ -286,25 +281,7 @@ Result.read = function(value, onValue, onError){
 	else onValue(value)
 }
 
-/**
- * coerce `value` to a Result
- *
- * @param {x} value
- * @return {Result}
- */
-
-Result.coerce = function(value){
-	if (value instanceof ResultType) {
-		if (value instanceof Result) return value
-		var result = new Result
-		value.read(
-			function(v){ result.write(v) },
-			function(e){ result.error(e) })
-		return result
-	}
-	return wrap(value)
-}
-
+Result.coerce = coerce
 Result.wrap = Result.done = wrap
 Result.failed = failed
 
