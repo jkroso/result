@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>result tests</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="../node_modules/mocha/mocha.css">
 </head>
@@ -13,11 +13,11 @@
 		mocha.setup('bdd')
 		mocha.timeout(200)
 
-		require('./index')
+		require('./result-core.test')
+		require('./result.test')
+		require('./defer.test')
 
-		mocha.run(function(){
-			console.log('Done!')
-		})
+		mocha.run()
 	</script>
 </body>
 </html>
