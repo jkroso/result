@@ -12,17 +12,17 @@
     "reify"
   ],
   "dependencies": {
-    "timoxley/next-tick": "0.0.2",
     "component/inherit": "0.0.2",
+    "jkroso/result-core": "1.1.1",
     "jkroso/result-type": "1.0.0",
     "jkroso/unhandled": "0.1.1"
   },
   "development": {
     "visionmedia/mocha": "1.12.1",
-    "jkroso/result-core": "1.0.4",
     "chaijs/chai-spies": "0.5.1",
     "jkroso/serve": "1.5.0",
-    "chaijs/chai": "1.7.2"
+    "chaijs/chai": "1.7.2",
+    "jkroso/on-crash": "0.1.0"
   },
   "scripts": [
     "index.js",
