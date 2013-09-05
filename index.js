@@ -199,7 +199,7 @@ function handle(result, fn, method, ctx){
  * @param {Any} result
  * @param {Function} onValue
  * @param {Function} onError
- * @return {Result}
+ * @return {Any}
  */
 
 Result.when = function(value, onValue, onError){
@@ -211,7 +211,7 @@ Result.when = function(value, onValue, onError){
 		return x
 	} else {
 		try { return onValue(value) }
-		catch (e) { return Result.failed(e) }
+		catch (e) { return failed(e) }
 	}
 }
 
