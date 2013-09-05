@@ -41,14 +41,10 @@ function trigger(method){
 		if (this.state === 'awaiting') {
 			this.state = 'pending'
 			try {
-				var self = this
-				var val
-				if (this.onNeed.length) {
-					this.onNeed(
-						function(val){ self.write(val) },
-						function(err){ self.error(err) })
-				} else if ((val = this.onNeed()) !== undefined) {
+				var val = this.onNeed()
+				if (val !== undefined) {
 					if (val instanceof ResultType) {
+						var self = this
 						val.read(
 							function(val){ self.write(val) },
 							function(err){ self.error(err) })
@@ -98,7 +94,14 @@ function unawait(method){
  */
 
 module.exports = exports = function(onNeed){
-	return new Deferred(onNeed)
+	return new Deferred(onNeed.length
+		? function(){
+			var self = this
+			onNeed.call(this,
+				function(v){ self.write(v) },
+				function(e){ self.error(e) })
+		}
+		: onNeed)
 }
 
 /**
