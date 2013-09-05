@@ -21,7 +21,6 @@ function Deferred(fn){
 
 inherit(Deferred, Result)
 
-Deferred.prototype.i = 0
 Deferred.prototype.state = 'awaiting'
 Deferred.prototype.then = trigger(then)
 Deferred.prototype.read = trigger(read)
