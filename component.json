@@ -2,7 +2,7 @@
   "name": "result",
   "repo": "jkroso/result",
   "description": "reify your results",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "keywords": [
     "result",
     "computation",
@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "component/inherit": "0.0.2",
-    "jkroso/result-core": "1.1.1",
+    "jkroso/result-core": "1.1.2",
     "jkroso/result-type": "1.0.0"
   },
   "development": {
@@ -22,7 +22,7 @@
     "chaijs/chai-spies": "0.5.1",
     "jkroso/serve": "1.5.0",
     "chaijs/chai": "1.7.2",
-    "jkroso/on-crash": "0.1.0"
+    "jkroso/on-crash": "0.1.1"
   },
   "scripts": [
     "index.js",
