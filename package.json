@@ -24,5 +24,6 @@
     "reify"
   ],
   "author": "Jake Rosoman",
-  "license": "MIT"
+  "license": "MIT",
+  "files": ["index.js", "defer.js"]
 }

@@ -13,7 +13,7 @@ test: node_modules
 
 node_modules: component.json
 	@packin install \
-		--meta package.json,component.json,deps.json \
+		--meta component.json,deps.json \
 		--folder node_modules \
 		--executables \
 		--no-retrace
