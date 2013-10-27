@@ -1,19 +1,21 @@
 REPORTER=dot
 
-serve: test
+serve: node_modules test/result-core.test.js
 	@node_modules/serve/bin/serve -Sloj
 
-test: node_modules
-	@ln -f node_modules/result-core/test/result-core.test.js test/result-core.test.js
+test: node_modules component.json
 	@node_modules/mocha/bin/_mocha test/*.test.js \
 		--reporter $(REPORTER) \
 		--timeout 500 \
 		--check-leaks \
 		--bail
 
-node_modules: component.json
+test/result-core.test.js:
+	@curl https://raw.github.com/jkroso/result-core/master/$@ > $@
+
+node_modules: *.json
 	@packin install \
-		--meta component.json,deps.json \
+		--meta deps.json,package.json,component.json \
 		--folder node_modules \
 		--executables \
 		--no-retrace

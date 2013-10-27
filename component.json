@@ -17,12 +17,11 @@
     "jkroso/result-type": "1.0.0"
   },
   "development": {
-    "jkroso/unhandled": "0.1.1",
-    "visionmedia/mocha": "1.12.1",
+    "visionmedia/mocha": "1.13.0",
     "chaijs/chai-spies": "0.5.1",
-    "jkroso/serve": "1.5.0",
-    "chaijs/chai": "1.7.2",
-    "jkroso/on-crash": "0.1.1"
+    "jkroso/on-crash": "0.1.1",
+    "jkroso/serve": "1.5.1",
+    "chaijs/chai": "1.8.1"
   },
   "scripts": [
     "index.js",
