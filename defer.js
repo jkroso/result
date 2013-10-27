@@ -2,10 +2,6 @@
 var ResultType = require('result-type')
 var inherit = require('inherit')
 var Result = require('./index')
-var write = Result.prototype.write
-var error = Result.prototype.error
-var then = Result.prototype.then
-var read = Result.prototype.read
 
 /**
  * the Deferred class
@@ -22,10 +18,10 @@ function Deferred(fn){
 inherit(Deferred, Result)
 
 Deferred.prototype.state = 'awaiting'
-Deferred.prototype.then = trigger(then)
-Deferred.prototype.read = trigger(read)
-Deferred.prototype.write = unawait(write)
-Deferred.prototype.error = unawait(error)
+Deferred.prototype.then = trigger(Result.prototype.then)
+Deferred.prototype.read = trigger(Result.prototype.read)
+Deferred.prototype.write = unawait(Result.prototype.write)
+Deferred.prototype.error = unawait(Result.prototype.error)
 
 /**
  * add a trigger aspect to `method`. This aspect
