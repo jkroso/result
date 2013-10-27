@@ -129,35 +129,6 @@ describe('Result', function(){
 		})
 	})
 
-	describe.skip('unhandled errors', function(){
-		var unhandled = require('unhandled')
-
-		afterEach(function(){
-			unhandled.remove(error)
-		})
-
-		it('should register when failing a promise without pending readers', function(){
-			result.error(error)
-			unhandled().should.eql([error])
-		})
-
-		it('should unregister when reading from a failed result', function(){
-			result.error(error)
-			result.read(null, function(e){
-				e.should.equal(error)
-			})
-			unhandled().should.eql([])
-		})
-
-		it('should unregister when `then`ing from a failed result', function(){
-			result.error(error)
-			result.then(null, function(e){
-				e.should.equal(error)
-			})
-			unhandled().should.eql([])
-		})
-	})
-
 	describe('when(result, onValue, onError)', function(){
 		it('should create a new Result', function(){
 			when(value, function(v){
