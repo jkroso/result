@@ -2,14 +2,11 @@
   "name": "result",
   "repo": "jkroso/result",
   "description": "reify your results",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "keywords": [
     "result",
-    "computation",
     "promise",
-    "future",
-    "thenable",
-    "reify"
+    "future"
   ],
   "dependencies": {
     "component/inherit": "0.0.2",
@@ -17,11 +14,11 @@
     "jkroso/result-type": "1.0.0"
   },
   "development": {
-    "visionmedia/mocha": "1.13.0",
-    "chaijs/chai-spies": "0.5.1",
-    "jkroso/on-crash": "0.1.1",
-    "jkroso/serve": "1.5.1",
-    "chaijs/chai": "1.8.1"
+    "visionmedia/mocha": "*",
+    "chaijs/chai-spies": "*",
+    "jkroso/on-crash": "*",
+    "jkroso/serve": "*",
+    "chaijs/chai": "*"
   },
   "scripts": [
     "index.js",

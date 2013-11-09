@@ -1,10 +1,10 @@
 {
   "name": "result",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "reify your results",
   "dependencies": {
-    "inherit": "http://github.com/nathan7/inherit/tarball/f1a75b4844",
-    "next-tick": "http://github.com/timoxley/next-tick/tarball/0.0.2",
+    "next-tick": "timoxley/next-tick",
+    "inherit": "nathan7/inherit",
     "result-type": "1.0.0",
     "result-core": "1.1.2"
   },
@@ -17,11 +17,8 @@
   },
   "keywords": [
     "result",
-    "computation",
     "promise",
-    "future",
-    "thenable",
-    "reify"
+    "future"
   ],
   "author": "Jake Rosoman",
   "license": "MIT",
