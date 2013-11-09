@@ -94,6 +94,10 @@ coerce `value` to a Result
 
 transform `value` with `onValue`. If `value` is a "failed" Result it will be passed to `onError` instead
 
+### transfer(a, b)
+
+  transfer the value of `a` to `b`
+
 ### defer(onNeed)
 
 create a Deferred which is associated with the Function `onNeed`. `onNeed` will only be called once someone actually reads from the Deferred. `then` returns a normal Result so from there on out you revert to eager evaluation. For a fully fledged lazy evaluation strategy [see](//github.com/jkroso/lazy-result).

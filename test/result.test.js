@@ -3,6 +3,7 @@ var ResultType = require('result-type')
 var inherit = require('inherit')
 var chai = require('./chai')
 var Result = require('..')
+var transfer = Result.transfer
 var coerce = Result.coerce
 var read = Result.read
 var when = Result.when
@@ -214,6 +215,35 @@ describe('Result', function(){
 		it('should extract the error an untrusted Result', function(){
 			coerce(new Dummy(new Error(1))).read(null, spy)
 			spy.should.have.been.called.with(new Error(1))
+		})
+	})
+
+	describe('transfer(a, b)', function(){
+		it('should transfer eventual results', function(done){
+			var b = new Result
+			transfer(delay(1), b)
+			b.read(function(val){
+				val.should.equal(1)
+				done()
+			})
+		})
+
+		it('should transfer eventual errors', function(done){
+			var b = new Result
+			transfer(delay(error), b)
+			b.read(null, function(e){
+				error.should.equal(e)
+				done()
+			})
+		})
+
+		it('should transfer immediate values', function(done){
+			var b = new Result
+			transfer(1, b)
+			b.read(function(val){
+				val.should.equal(1)
+				done()
+			})
 		})
 	})
 })

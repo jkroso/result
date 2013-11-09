@@ -5,6 +5,23 @@ var listen = ResultCore.addListener
 var inherit = require('inherit')
 
 /**
+ * expose `Result`
+ */
+
+module.exports = exports = Result
+
+/**
+ * expose helpers
+ */
+
+exports.wrap = exports.done = wrap
+exports.transfer = transfer
+exports.coerce = coerce
+exports.failed = failed
+exports.when = when
+exports.read = read
+
+/**
  * the Result class
  */
 
@@ -202,7 +219,7 @@ function handle(result, fn, method, ctx){
  * @return {Any}
  */
 
-Result.when = function(value, onValue, onError){
+function when(value, onValue, onError){
 	if (value instanceof ResultType) {
 		var x = new Result
 		value.read(
@@ -224,13 +241,20 @@ Result.when = function(value, onValue, onError){
  * @param {Function} onError
  */
 
-Result.read = function(value, onValue, onError){
+function read(value, onValue, onError){
 	if (value instanceof ResultType) value.read(onValue, onError)
 	else onValue(value)
 }
 
-Result.coerce = coerce
-Result.wrap = Result.done = wrap
-Result.failed = failed
+/**
+ * transfer the value of `a` to `b`
+ *
+ * @param {Any} a
+ * @param {Result} b
+ */
 
-module.exports = Result
+function transfer(a, b){
+	read(a,
+		function(val){ b.write(val) },
+		function(err){ b.error(err) })
+}
