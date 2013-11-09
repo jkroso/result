@@ -92,19 +92,36 @@ transform `value` with `onValue`. If `value` is a "failed" Result it will be pas
 
 ### defer(onNeed)
 
-create a Deferred which is associated with the Function `onNeed`. `onNeed` will only be called once someone actually reads from the Deferred. `then` returns a normal Result so from there on out you revert to eager evaluation. For a fully fledged lazy evaluation strategy [see](//github.com/jkroso/lazy-result).
+Sometimes your not sure if an expensive to computation is actually going to be required or not. Without any abstraction this forces you to either waste computation or expose a goofy API to consumers of the result. The `defer` function solves this by creating a special type of `Result`, a DeferredResult, which executes a function and assimilates its result the first time someone reads the `DeferredResult`. From the consumers perspective this is just a normal `Result` so no goofy API required.
 
 ```js
-var results = ['google.com', 'bing.com'].map(function(engine){
-	return defer(function(write, error){
-		return request(engine+'?q=hello')
-			.on('response', write)
-			.on('error', error)
-	})
+var results = [
+  'duckduckgo.com',
+  'google.com',
+  'bing.com',
+].map(function(engine){
+  return defer(function(){
+    return request(engine + '?q=hello')
+  })
 })
-detect(results, function(result){
-	return result.ok
-}).then(display)
+
+detect(results, function(response){
+  return response.status == 200
+}).read(console.log)
+
+function detect(values, predicate){
+  var result = new Result
+  var i = 0
+  function next(){
+    read(values[i++], function(value){
+      if (predicate(value)) result.write(value)
+      else next()
+    }, error)
+  }
+  function error(e){ result.error(e) }
+  next()
+  return result
+}
 ```
 
 ## Running the tests
