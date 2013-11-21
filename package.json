@@ -1,6 +1,6 @@
 {
   "name": "result",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "reify your results",
   "dependencies": {
     "next-tick": "timoxley/next-tick",
@@ -8,13 +8,8 @@
     "result-type": "1.0.0",
     "result-core": "1.1.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jkroso/result.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jkroso/result/issues"
-  },
+  "repository": "git://github.com/jkroso/result.git",
+  "bugs": "https://github.com/jkroso/result/issues",
   "keywords": [
     "result",
     "promise",
