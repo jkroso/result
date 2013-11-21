@@ -130,119 +130,117 @@ describe('Result', function(){
 		})
 	})
 
-	describe('when(result, onValue, onError)', function(){
-		it('should create a new Result', function(){
-			when(value, function(v){
-				return v + 1
-			}).read(spy)
-			spy.should.have.been.called.with(2)
+	describe('functions', function(){
+		describe('when', function(){
+			it('should return an unboxed value if possible', function(){
+				when(value, function(v){ return v + 1 }).should.equal(2)
+				when(1, function(value){ return value + 1 }).should.equal(2)
+			})
+
+			it('should return a new Result otherwise', function(done){
+				when(delay(1), function(n){ return n + 1}).then(function(n){
+					n.should.equal(2)
+				}).node(done)
+			})
+
+			it('should propagate rejection', function(){
+				when(failed, null, spy)
+				spy.should.have.been.called.with(error)
+			})
+
+			it('should catch errors on sync operations', function(){
+				when(1, function(){
+					throw new Error('fail')
+				}).read(null, spy)
+				spy.should.have.been.called(1)
+			})
+
+			it('should forward `this` to the handlers', function(done){
+				when.call(done, delay(1), function(one){
+					one.should.equal(1)
+					this.should.equal(done)
+				}).node(done)
+			})
 		})
 
-		it('should propagate rejection', function(){
-			when(result, null, spy)
-			result.error(error)
-			spy.should.have.been.called.with(error)
-		})
-
-		it('should return a plain value if it can', function(){
-			when(1, function(value){
-				value.should.equal(1)
-				return value + 1
-			}).should.equal(2)
-		})
-
-		it('should catch errors on sync operations', function(){
-			when(1, function(){
-				throw new Error('fail')
-			}).read(null, spy)
-			spy.should.have.been.called(1)
-		})
-
-		it('should forward `this` to the handlers', function(done){
-			when.call(done, delay(1), function(one){
-				one.should.equal(1)
-				this.should.equal(done)
-			}).node(done)
-		})
-	})
-
-	function Dummy(value){
-		this.read = function(onValue, onError){
-			if (value instanceof Error) onError(value)
-			else onValue(value)
+		function Dummy(value){
+			this.read = function(onValue, onError){
+				if (value instanceof Error) onError(value)
+				else onValue(value)
+			}
 		}
-	}
-	inherit(Dummy, ResultType)
+		inherit(Dummy, ResultType)
 
-	describe('read(value, onValue, onError)', function(){
-		it('should call the onValue function with the value', function(){
-			read(true, spy)
-			spy.should.have.been.called.with(true)
-		})
+		describe('read', function(){
+			it('should call the onValue function with the value', function(){
+				read(true, spy)
+				spy.should.have.been.called.with(true)
+			})
 
-		it('should handle "done" Results', function(){
-			read(value, spy)
-			spy.should.have.been.called.with(1)
-		})
+			it('should handle "done" Results', function(){
+				read(value, spy)
+				spy.should.have.been.called.with(1)
+			})
 
-		it('should handle "failed" results', function(){
-			read(failed, null, spy)
-			spy.should.have.been.called.with(error)
-		})
+			it('should handle "failed" results', function(){
+				read(failed, null, spy)
+				spy.should.have.been.called.with(error)
+			})
 
-		it('should handle funny Result instances', function(){
-			read(new Dummy(1), spy)
-			spy.should.have.been.called.with.exactly(1)
-			read(new Dummy(error), null, spy)
-			spy.should.have.been.called.with(error)
-		})
-	})
-
-	describe('coerce(value)', function(){
-		it('should return a trusted Result', function(){
-			coerce().should.be.an.instanceOf(Result)
-		})
-
-		it('should convert untrusted Results to trusted', function(){
-			coerce(new Dummy).should.be.an.instanceOf(Result)
-		})
-
-		it('should extract the value of the untrusted Result', function(){
-			coerce(new Dummy(1)).read(spy)
-			spy.should.have.been.called.with(1)
-		})
-
-		it('should extract the error an untrusted Result', function(){
-			coerce(new Dummy(new Error(1))).read(null, spy)
-			spy.should.have.been.called.with(new Error(1))
-		})
-	})
-
-	describe('transfer(a, b)', function(){
-		it('should transfer eventual results', function(done){
-			var b = new Result
-			transfer(delay(1), b)
-			b.read(function(val){
-				val.should.equal(1)
-				done()
+			it('should handle funny Result instances', function(){
+				read(new Dummy(1), spy)
+				spy.should.have.been.called.with.exactly(1)
+				read(new Dummy(error), null, spy)
+				spy.should.have.been.called.with(error)
 			})
 		})
 
-		it('should transfer eventual errors', function(done){
-			var b = new Result
-			transfer(delay(error), b)
-			b.read(null, function(e){
-				error.should.equal(e)
-				done()
+		describe('coerce(value)', function(){
+			it('should return a trusted Result', function(){
+				coerce().should.be.an.instanceOf(Result)
+			})
+
+			it('should convert untrusted Results to trusted', function(){
+				coerce(new Dummy).should.be.an.instanceOf(Result)
+			})
+
+			it('should extract the value of the untrusted Result', function(){
+				coerce(new Dummy(1)).read(spy)
+				spy.should.have.been.called.with(1)
+			})
+
+			it('should extract the error an untrusted Result', function(){
+				coerce(new Dummy(new Error(1))).read(null, spy)
+				spy.should.have.been.called.with(new Error(1))
 			})
 		})
 
-		it('should transfer immediate values', function(done){
-			var b = new Result
-			transfer(1, b)
-			b.read(function(val){
-				val.should.equal(1)
-				done()
+		describe('transfer', function(){
+			it('should transfer eventual results', function(done){
+				var b = new Result
+				transfer(delay(1), b)
+				b.read(function(val){
+					val.should.equal(1)
+					done()
+				})
+			})
+
+			it('should transfer eventual errors', function(done){
+				var b = new Result
+				transfer(delay(error), b)
+				b.read(null, function(e){
+					error.should.equal(e)
+					done()
+				})
+			})
+
+			it('should transfer immediate values', function(done){
+				var b = new Result
+				transfer(1, b)
+				b.read(function(val){
+					val.should.equal(1)
+					done()
+				})
 			})
 		})
 	})

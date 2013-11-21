@@ -209,9 +209,11 @@ function handle(result, fn, method, ctx){
 }
 
 /**
- * transform `value` with `onValue`. If `value`
- * is a "failed" Result it will be passed to
- * `onError` instead
+ * run `value` through `onValue`. If `value` is a
+ * "failed" promise it will be passed to `onError`
+ * instead. Any errors will result in a "failed"
+ * promise being returned rather than an error
+ * thrown so you don't have to use a try catch
  *
  * @param {Any} result
  * @param {Function} onValue
@@ -220,21 +222,25 @@ function handle(result, fn, method, ctx){
  */
 
 function when(value, onValue, onError){
-	if (value instanceof ResultType) {
-		var x = new Result
-		value.read(
-			handle(x, onValue, 'write', this),
-			handle(x, onError, 'error', this))
-		return x
-	} else {
-		try { return onValue(value) }
-		catch (e) { return failed(e) }
+	if (value instanceof ResultType) switch (value.state) {
+		case 'fail': onValue = onError;
+		case 'done': value = value.value; break
+		default:
+			var x = new Result
+			value.read(
+				handle(x, onValue, 'write', this),
+				handle(x, onError, 'error', this))
+			// unbox if possible
+			return x.state == 'done'
+				? x.value
+				: x
 	}
+	try { return onValue(value) }
+	catch (e) { return failed(e) }
 }
 
 /**
- * read the value of `value` even if its
- * within a Result
+ * read `value` even if its within a promise
  *
  * @param {x} value
  * @param {Function} onValue
