@@ -7,13 +7,11 @@ A big problem arises when your programs input comes from outside of memory thoug
 
 ## Installation
 
-_With [component](//github.com/component/component) or [packin](//github.com/jkroso/packin)_
+With your favourite package manager:
 
-	$ packin add jkroso/result
-
-_With [npm](//github.com/isaacs/npm)_
-
-	$ npm install result
+- [packin](//github.com/jkroso/packin): `packin add result`
+- [component](//github.com/component/component#installing-packages): `component install jkroso/result`
+- [npm](//npmjs.org/doc/cli/npm-install.html): `npm install result`
 
 then in your app:
 
@@ -123,7 +121,3 @@ function detect(values, predicate){
   return result
 }
 ```
-
-## Running the tests
-
-Just run `make test`
