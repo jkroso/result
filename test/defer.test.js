@@ -33,7 +33,7 @@ describe('defer', function(){
 		})
 
 		it('should propagate values', function(done){
-			defer(function(write){
+			defer(function(write, error){
 				write(1)
 			}).then(inc).then(function(n){
 				n.should.equal(2)
@@ -113,6 +113,21 @@ describe('defer', function(){
 				return delay(error)
 			}).then(null, function(e){
 				e.should.equal(error)
+				done()
+			})
+		})
+	})
+
+	it('should support standard cb API\'s', function(done){
+		var error = new Error(this.test.title)
+		defer(function(cb){
+			cb(error)
+		}).read(null, function(e){
+			e.should.equal(error)
+			defer(function(cb){
+				cb(null, 1)
+			}).read(function(n){
+				n.should.equal(1)
 				done()
 			})
 		})

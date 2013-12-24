@@ -4,18 +4,14 @@ var inherit = require('inherit')
 var Result = require('./index')
 
 /**
- * the Deferred class
+ * Deferred class
  */
 
 function Deferred(fn){
 	this.onNeed = fn
 }
 
-/**
- * inherit from Result
- */
-
-inherit(Deferred, Result)
+inherit(Deferred, Result) // inherit from Result
 
 Deferred.prototype.state = 'awaiting'
 Deferred.prototype.then = trigger(Result.prototype.then)
@@ -81,7 +77,11 @@ function unawait(method){
  *     this.write('hello')
  *   })
  *
- *   defer(function(write){
+ *   defer(function(cb){
+ *     cb(null, 'hello')
+ *   })
+ *
+ *   defer(function(write, error){
  *     write('hello')
  *   })
  *
@@ -89,25 +89,25 @@ function unawait(method){
  * @return {Deferred}
  */
 
-module.exports = exports = function(onNeed){
-	return new Deferred(onNeed.length
-		? function(){
+function defer(onNeed){
+	switch (onNeed.length) {
+		case 2: return new Deferred(function(){
 			var self = this
 			onNeed.call(this,
 				function(v){ self.write(v) },
 				function(e){ self.error(e) })
-		}
-		: onNeed)
+		})
+		case 1: return new Deferred(function(){
+			var self = this
+			onNeed.call(this, function(e, v){
+				if (e != null) self.error(e)
+				else self.write(v)
+			})
+		})
+		default: return new Deferred(onNeed)
+	}
 }
 
-/**
- * share prototypes
- */
-
-exports.prototype = Deferred.prototype
-
-/**
- * expose Deferred
- */
-
-exports.Deferred = Deferred
+module.exports = defer // expose defer
+defer.prototype = Deferred.prototype // share prototypes
+defer.Deferred = Deferred // expose class
