@@ -1,6 +1,6 @@
 {
   "name": "result",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "reify your results",
   "dependencies": {
     "next-tick": "timoxley/next-tick",
@@ -8,13 +8,16 @@
     "result-type": "1.0.0",
     "result-core": "1.1.2"
   },
+  "devDependencies": {
+    "serve": "jkroso/serve",
+    "chai-spies": "*",
+    "on-crash": "*",
+    "mocha": "*",
+    "chai": "*"
+  },
   "repository": "git://github.com/jkroso/result.git",
   "bugs": "https://github.com/jkroso/result/issues",
-  "keywords": [
-    "result",
-    "promise",
-    "future"
-  ],
+  "keywords": ["result", "promise", "future"],
   "author": "Jake Rosoman",
   "license": "MIT",
   "files": ["index.js", "defer.js"]

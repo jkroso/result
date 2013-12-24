@@ -2,27 +2,13 @@
   "name": "result",
   "repo": "jkroso/result",
   "description": "reify your results",
-  "version": "0.4.4",
-  "keywords": [
-    "result",
-    "promise",
-    "future"
-  ],
+  "version": "0.4.5",
+  "keywords": ["result", "promise", "future"],
   "dependencies": {
-    "component/inherit": "0.0.2",
     "jkroso/result-core": "1.1.2",
-    "jkroso/result-type": "1.0.0"
+    "jkroso/result-type": "1.0.0",
+    "component/inherit": "0.0.2"
   },
-  "development": {
-    "visionmedia/mocha": "*",
-    "chaijs/chai-spies": "*",
-    "jkroso/on-crash": "*",
-    "jkroso/serve": "*",
-    "chaijs/chai": "*"
-  },
-  "scripts": [
-    "index.js",
-    "defer.js"
-  ],
+  "scripts": ["index.js", "defer.js"],
   "license": "MIT"
 }
