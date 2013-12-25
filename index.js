@@ -231,12 +231,10 @@ function when(value, onValue, onError){
 				handle(x, onValue, 'write', this),
 				handle(x, onError, 'error', this))
 			// unbox if possible
-			return x.state == 'done'
-				? x.value
-				: x
+			return x.state == 'done' ? x.value : x
 	}
-	try { return onValue(value) }
-	catch (e) { return failed(e) }
+	try { return onValue.call(this, value)  }
+	catch (e) { return failed.call(this, e) }
 }
 
 /**

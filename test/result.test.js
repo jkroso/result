@@ -159,6 +159,9 @@ describe('Result', function(){
 				when.call(done, delay(1), function(one){
 					one.should.equal(1)
 					this.should.equal(done)
+					return when.call(done, true, function(){
+						this.should.equal(done)
+					})
 				}).node(done)
 			})
 		})
