@@ -15,7 +15,7 @@ test/result-core.test.js:
 
 node_modules: package.json
 	@packin install -c \
-		--meta package.json \
+		--meta deps.json,package.json \
 		--folder node_modules
 	
 .PHONY: serve test

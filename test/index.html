@@ -1,23 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<title>result tests</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="../node_modules/mocha/mocha.css">
-</head>
-<body>
-	<div id="mocha"></div>
-	<script>
-		var mocha = require('mocha')
-		mocha.setup('bdd')
-		mocha.timeout(200)
 
-		require('./result-core.test')
-		require('./result.test')
-		require('./defer.test')
+<title>result tests</title>
+<link rel="stylesheet" href="../node_modules/hydro-html/index.css">
 
-		mocha.run()
-	</script>
-</body>
-</html>
+<div id="hydro"></div>
+
+<script>
+  var Hydro = require('hydro')
+  var hydro = new Hydro
+  require('./hydro.conf')(hydro)
+  hydro.set('formatter', require('hydro-html'))
+  hydro.setup()
+
+  require('./result-core.test')
+  require('./result.test')
+  require('./defer.test')
+
+  hydro.run(function(err){
+    if (err) throw err
+  })
+</script>

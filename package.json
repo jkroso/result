@@ -11,8 +11,11 @@
   "devDependencies": {
     "serve": "jkroso/serve",
     "chai-spies": "*",
+    "hydro-chai": "*",
+    "hydro-html": "*",
+    "hydro-dot": "*",
+    "hydro-bdd": "*",
     "on-crash": "*",
-    "mocha": "*",
     "chai": "*"
   },
   "repository": "git://github.com/jkroso/result.git",
