@@ -161,6 +161,23 @@ describe('Result', function(){
           })
         }).node(done)
       })
+
+      it('should not require an onError function', function(done){
+        when(failed, done).then(null, function(e){
+          e.should.equal(error)
+          done()
+        })
+      })
+
+      it('should not require an onValue function when async', function(done){
+        when(delay(1)).then(function(value){
+          value.should.equal(1)
+        }).node(done)
+      })
+
+      it('should not require an onValue function when sync', function(){
+        when(1).should.equal(1)
+      })
     })
 
     function Dummy(value){

@@ -223,8 +223,14 @@ function handle(result, fn, method, ctx){
 
 function when(value, onValue, onError){
 	if (value instanceof ResultType) switch (value.state) {
-		case 'fail': onValue = onError;
-		case 'done': value = value.value; break
+		case 'fail':
+			if (!onError) return value
+			onValue = onError
+			value = value.value
+			break
+		case 'done':
+			value = value.value
+			break
 		default:
 			var x = new Result
 			value.read(
@@ -233,6 +239,7 @@ function when(value, onValue, onError){
 			// unbox if possible
 			return x.state == 'done' ? x.value : x
 	}
+	if (!onValue) return value
 	try { return onValue.call(this, value)  }
 	catch (e) { return failed.call(this, e) }
 }
