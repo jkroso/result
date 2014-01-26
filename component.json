@@ -2,7 +2,6 @@
   "name": "result",
   "repo": "jkroso/result",
   "description": "reify your results",
-  "version": "0.4.6",
   "keywords": ["result", "promise", "future"],
   "dependencies": {
     "jkroso/result-core": "1.1.2",

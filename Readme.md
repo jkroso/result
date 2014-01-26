@@ -88,6 +88,10 @@ transform `value` with `onValue`. If `value` is a "failed" Result it will be pas
 
   transfer the value of `a` to `b`
 
+### unbox(value)
+
+  attempt to unbox a value synchronously
+
 ### defer(onNeed)
 
 Sometimes your not sure if an expensive to computation is actually going to be required or not. Without any abstraction this forces you to either waste computation or expose a goofy API to consumers of the result. The `defer` function solves this by creating a special type of `Result`, a DeferredResult, which executes a function and assimilates its result the first time someone reads the `DeferredResult`. From the consumers perspective this is just a normal `Result` so no goofy API required.
