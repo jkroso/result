@@ -8,7 +8,7 @@ var Result = require('./index')
  */
 
 function Deferred(fn){
-	this.onNeed = fn
+  this.onNeed = fn
 }
 
 inherit(Deferred, Result) // inherit from Result
@@ -29,27 +29,27 @@ Deferred.prototype.error = unawait(Result.prototype.error)
  */
 
 function trigger(method){
-	return function(onValue, onError){
-		if (this.state === 'awaiting') {
-			this.state = 'pending'
-			try {
-				var val = this.onNeed()
-				if (val !== undefined) {
-					if (val instanceof ResultType) {
-						var self = this
-						val.read(
-							function(val){ self.write(val) },
-							function(err){ self.error(err) })
-					} else {
-						this.write(val)
-					}
-				}
-			} catch (e) {
-				this.error(e)
-			}
-		}
-		return method.call(this, onValue, onError)
-	}
+  return function(onValue, onError){
+    if (this.state === 'awaiting') {
+      this.state = 'pending'
+      try {
+        var val = this.onNeed()
+        if (val !== undefined) {
+          if (val instanceof ResultType) {
+            var self = this
+            val.read(
+              function(val){ self.write(val) },
+              function(err){ self.error(err) })
+          } else {
+            this.write(val)
+          }
+        }
+      } catch (e) {
+        this.error(e)
+      }
+    }
+    return method.call(this, onValue, onError)
+  }
 }
 
 /**
@@ -62,10 +62,10 @@ function trigger(method){
  */
 
 function unawait(method){
-	return function(value){
-		if (this.state === 'awaiting') this.state = 'pending'
-		return method.call(this, value)
-	}
+  return function(value){
+    if (this.state === 'awaiting') this.state = 'pending'
+    return method.call(this, value)
+  }
 }
 
 /**
@@ -90,22 +90,22 @@ function unawait(method){
  */
 
 function defer(onNeed){
-	switch (onNeed.length) {
-		case 2: return new Deferred(function(){
-			var self = this
-			onNeed.call(this,
-				function(v){ self.write(v) },
-				function(e){ self.error(e) })
-		})
-		case 1: return new Deferred(function(){
-			var self = this
-			onNeed.call(this, function(e, v){
-				if (e != null) self.error(e)
-				else self.write(v)
-			})
-		})
-		default: return new Deferred(onNeed)
-	}
+  switch (onNeed.length) {
+    case 2: return new Deferred(function(){
+      var self = this
+      onNeed.call(this,
+        function(v){ self.write(v) },
+        function(e){ self.error(e) })
+    })
+    case 1: return new Deferred(function(){
+      var self = this
+      onNeed.call(this, function(e, v){
+        if (e != null) self.error(e)
+        else self.write(v)
+      })
+    })
+    default: return new Deferred(onNeed)
+  }
 }
 
 module.exports = defer // expose defer
