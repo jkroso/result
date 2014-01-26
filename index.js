@@ -18,6 +18,7 @@ exports.wrap = exports.done = wrap
 exports.transfer = transfer
 exports.coerce = coerce
 exports.failed = failed
+exports.unbox = unbox
 exports.when = when
 exports.read = read
 
@@ -43,21 +44,21 @@ inherit(Result, ResultCore)
  */
 
 Result.prototype.then = function(onValue, onError) {
-	switch (this.state) {
-		case 'pending':
-			var x = new Result
-			listen(this, '_onValue', handle(x, onValue, 'write', this))
-			listen(this, '_onError', handle(x, onError, 'error', this))
-			return x
-		case 'done':
-			return typeof onValue == 'function'
-				? run(onValue, this.value, this)
-				: wrap(this.value)
-		case 'fail':
-			return typeof onError == 'function'
-				? run(onError, this.value, this)
-				: failed(this.value)
-	}
+  switch (this.state) {
+    case 'pending':
+      var x = new Result
+      listen(this, '_onValue', handle(x, onValue, 'write', this))
+      listen(this, '_onError', handle(x, onError, 'error', this))
+      return x
+    case 'done':
+      return typeof onValue == 'function'
+        ? run(onValue, this.value, this)
+        : wrap(this.value)
+    case 'fail':
+      return typeof onError == 'function'
+        ? run(onError, this.value, this)
+        : failed(this.value)
+  }
 }
 
 /**
@@ -68,7 +69,7 @@ Result.prototype.then = function(onValue, onError) {
  */
 
 Result.prototype.always = function(fn){
-	return this.then(fn, fn)
+  return this.then(fn, fn)
 }
 
 /**
@@ -81,7 +82,7 @@ Result.prototype.always = function(fn){
  */
 
 Result.prototype.node = function(fn){
-	return this.read(function(v){ fn(null, v) }, fn)
+  return this.read(function(v){ fn(null, v) }, fn)
 }
 
 /**
@@ -96,7 +97,7 @@ Result.prototype.node = function(fn){
  */
 
 Result.prototype.yeild = function(value){
-	return this.then(function(){ return value })
+  return this.then(function(){ return value })
 }
 
 /**
@@ -107,9 +108,9 @@ Result.prototype.yeild = function(value){
  */
 
 Result.prototype.get = function(attr){
-	return this.then(function(obj){
-		return obj[attr]
-	})
+  return this.then(function(obj){
+    return obj[attr]
+  })
 }
 
 /**
@@ -123,8 +124,8 @@ Result.prototype.get = function(attr){
  */
 
 function run(handler, value, ctx){
-	try { return coerce(handler.call(ctx, value)) }
-	catch (e) { return failed(e) }
+  try { return coerce(handler.call(ctx, value)) }
+  catch (e) { return failed(e) }
 }
 
 /**
@@ -136,10 +137,10 @@ function run(handler, value, ctx){
  */
 
 function failed(reason){
-	var res = new Result
-	res.value = reason
-	res.state = 'fail'
-	return res
+  var res = new Result
+  res.value = reason
+  res.state = 'fail'
+  return res
 }
 
 /**
@@ -151,10 +152,10 @@ function failed(reason){
  */
 
 function wrap(value){
-	var res = new Result
-	res.value = value
-	res.state = 'done'
-	return res
+  var res = new Result
+  res.value = value
+  res.state = 'done'
+  return res
 }
 
 /**
@@ -166,15 +167,15 @@ function wrap(value){
  */
 
 function coerce(value){
-	if (value instanceof ResultType) {
-		if (value instanceof Result) return value
-		var result = new Result
-		value.read(
-			function(v){ result.write(v) },
-			function(e){ result.error(e) })
-		return result
-	}
-	return wrap(value)
+  if (value instanceof ResultType) {
+    if (value instanceof Result) return value
+    var result = new Result
+    value.read(
+      function(v){ result.write(v) },
+      function(e){ result.error(e) })
+    return result
+  }
+  return wrap(value)
 }
 
 /**
@@ -192,20 +193,20 @@ function coerce(value){
  */
 
 function handle(result, fn, method, ctx){
-	return typeof fn != 'function'
-		? function(x){ return result[method](x) }
-		: function(x){
-			try { x = fn.call(ctx, x) }
-			catch (e) { return result.error(e) }
+  return typeof fn != 'function'
+    ? function(x){ return result[method](x) }
+    : function(x){
+      try { x = fn.call(ctx, x) }
+      catch (e) { return result.error(e) }
 
-			if (x instanceof ResultType) {
-				x.read(
-					function(v){ result.write(v) },
-					function(e){ result.error(e) })
-			} else {
-				result.write(x)
-			}
-		}
+      if (x instanceof ResultType) {
+        x.read(
+          function(v){ result.write(v) },
+          function(e){ result.error(e) })
+      } else {
+        result.write(x)
+      }
+    }
 }
 
 /**
@@ -222,26 +223,26 @@ function handle(result, fn, method, ctx){
  */
 
 function when(value, onValue, onError){
-	if (value instanceof ResultType) switch (value.state) {
-		case 'fail':
-			if (!onError) return value
-			onValue = onError
-			value = value.value
-			break
-		case 'done':
-			value = value.value
-			break
-		default:
-			var x = new Result
-			value.read(
-				handle(x, onValue, 'write', this),
-				handle(x, onError, 'error', this))
-			// unbox if possible
-			return x.state == 'done' ? x.value : x
-	}
-	if (!onValue) return value
-	try { return onValue.call(this, value)  }
-	catch (e) { return failed.call(this, e) }
+  if (value instanceof ResultType) switch (value.state) {
+    case 'fail':
+      if (!onError) return value
+      onValue = onError
+      value = value.value
+      break
+    case 'done':
+      value = value.value
+      break
+    default:
+      var x = new Result
+      value.read(
+        handle(x, onValue, 'write', this),
+        handle(x, onError, 'error', this))
+      // unbox if possible
+      return x.state == 'done' ? x.value : x
+  }
+  if (!onValue) return value
+  try { return onValue.call(this, value)  }
+  catch (e) { return failed.call(this, e) }
 }
 
 /**
@@ -253,8 +254,8 @@ function when(value, onValue, onError){
  */
 
 function read(value, onValue, onError){
-	if (value instanceof ResultType) value.read(onValue, onError)
-	else onValue(value)
+  if (value instanceof ResultType) value.read(onValue, onError)
+  else onValue(value)
 }
 
 /**
@@ -265,7 +266,23 @@ function read(value, onValue, onError){
  */
 
 function transfer(a, b){
-	read(a,
-		function(val){ b.write(val) },
-		function(err){ b.error(err) })
+  read(a,
+    function(val){ b.write(val) },
+    function(err){ b.error(err) })
+}
+
+/**
+ * attempt to unbox a value synchronously
+ *
+ * @param {Any} value
+ * @return {Any}
+ * @throws {Error} If given a pending result
+ * @throws {Any} If given a failed result
+ */
+
+function unbox(value){
+  if (!(value instanceof ResultType)) return value
+  if (value.state == 'done') return value.value
+  if (value.state == 'fail') throw value.value
+  throw new Error('can\'t unbox a pending result')
 }

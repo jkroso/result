@@ -180,6 +180,29 @@ describe('Result', function(){
       })
     })
 
+    describe('unbox', function(){
+      var unbox = Result.unbox
+      it('should return a plain value', function(){
+        unbox(1).should.equal(1)
+      })
+
+      it('should unbox a "done" result', function(){
+        unbox(Result.wrap(1)).should.equal(1)
+      })
+
+      it('should throw a "fail" result', function(){
+        (function(){
+          unbox(failed)
+        }).should.throw(error)
+      })
+
+      it('should throw on a "pending" result', function(){
+        (function(){
+          unbox(new Result)
+        }).should.throw(/can't unbox a pending result/i)
+      })
+    })
+
     function Dummy(value){
       this.read = function(onValue, onError){
         if (value instanceof Error) onError(value)
