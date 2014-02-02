@@ -168,15 +168,13 @@ function wrap(value){
  */
 
 function coerce(value){
-  if (value instanceof ResultType) {
-    if (value instanceof Result) return value
-    var result = new Result
-    value.read(
-      function(v){ result.write(v) },
-      function(e){ result.error(e) })
-    return result
-  }
-  return wrap(value)
+  if (!(value instanceof ResultType)) return wrap(value)
+  if (value instanceof Result) return value
+  var result = new Result
+  value.read(
+    function(v){ result.write(v) },
+    function(e){ result.error(e) })
+  return result
 }
 
 /**
