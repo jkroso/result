@@ -2,6 +2,7 @@
 var ResultType = require('result-type')
 var inherit = require('inherit')
 var Result = require('./index')
+var listen = Result.prototype.listen
 var transfer = Result.transfer
 
 /**
@@ -19,29 +20,25 @@ function Deferred(fn){
 inherit(Deferred, Result)
 
 Deferred.prototype.called = false
-Deferred.prototype.then = trigger(Result.prototype.then)
-Deferred.prototype.read = trigger(Result.prototype.read)
 
 /**
- * add a trigger aspect to `method`. This aspect
- * ensures `onNeed` is called on first read().
+ * add a trigger aspect to listen. This aspect ensures
+ * `onNeed` is called the first time someone reads from
+ * the Deferred result
  *
  * @param {Function} method
  * @return {Function}
  * @api private
  */
 
-function trigger(method){
-  return function(onValue, onError){
-    if (this.state == 'pending' && !this.called) {
-      this.called = true
-      try {
-        transfer(this.onNeed(), this)
-      } catch (e) {
-        this.error(e)
-      }
-    }
-    return method.call(this, onValue, onError)
+Deferred.prototype.listen = function(onValue, onError){
+  listen.call(this, onValue, onError)
+  if (this.called) return
+  this.called = true
+  try {
+    transfer(this.onNeed(), this)
+  } catch (e) {
+    this.error(e)
   }
 }
 
@@ -50,17 +47,9 @@ function trigger(method){
  * Function `onNeed`. `onNeed` will only be called
  * once someone actually reads from the Deferred.
  *
- *   defer(function(){
- *     this.write('hello')
- *   })
- *
- *   defer(function(cb){
- *     cb(null, 'hello')
- *   })
- *
- *   defer(function(write, error){
- *     write('hello')
- *   })
+ *   defer(function(){ return 'hello' })
+ *   defer(function(cb){ cb(null, 'hello') })
+ *   defer(function(write, error){ write('hello') })
  *
  * @param {Function} onNeed(write, error)
  * @return {Deferred}
