@@ -12,13 +12,15 @@ function Deferred(fn){
   this.onNeed = fn
 }
 
-inherit(Deferred, Result) // inherit from Result
+/**
+ * inherit from Result
+ */
 
-Deferred.prototype.state = 'awaiting'
+inherit(Deferred, Result)
+
+Deferred.prototype.called = false
 Deferred.prototype.then = trigger(Result.prototype.then)
 Deferred.prototype.read = trigger(Result.prototype.read)
-Deferred.prototype.write = unawait(Result.prototype.write)
-Deferred.prototype.error = unawait(Result.prototype.error)
 
 /**
  * add a trigger aspect to `method`. This aspect
@@ -31,8 +33,8 @@ Deferred.prototype.error = unawait(Result.prototype.error)
 
 function trigger(method){
   return function(onValue, onError){
-    if (this.state === 'awaiting') {
-      this.state = 'pending'
+    if (this.state == 'pending' && !this.called) {
+      this.called = true
       try {
         transfer(this.onNeed(), this)
       } catch (e) {
@@ -40,22 +42,6 @@ function trigger(method){
       }
     }
     return method.call(this, onValue, onError)
-  }
-}
-
-/**
- * add a state switching aspect to `method`.
- * Otherwise write/error would behave incorrectly
- *
- * @param {Function} method
- * @return {Function}
- * @api private
- */
-
-function unawait(method){
-  return function(value){
-    if (this.state === 'awaiting') this.state = 'pending'
-    return method.call(this, value)
   }
 }
 
