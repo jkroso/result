@@ -42,10 +42,6 @@ put the Result into a failed state
 
 Create a Result for a transformation of the value of `this` Result
 
-### Result#always(fn)
-
-use the same `fn` for both `onValue` and `onError`
-
 ### Result#node(fn(error, value))
 
 read using a node style function
@@ -54,41 +50,55 @@ read using a node style function
 result.node(function(err, value){})
 ```
 
-### Result#yeild(value)
+### Result#yield(value)
 
 Create a child Result destined to fulfill with `value`
 
 ```js
 return result.then(function(value){
 	// something side effect
-}).yeild(e)
+}).yield(e)
 ```
 
-### failed()
+### Result#throw(error)
+
+  like yield but throws instead of returning
+
+```js
+return result.then(function(value){
+  // some side effect
+}).throw(e)
+```
+
+### Result#get(attr:String)
+
+  return a Result for `this[attr]`
+
+### Result.failed()
 
 wrap `reason` in a "failed" result
 
-### wrap()
+### Result.wrap()
 
 wrap `value` in a "done" Result
 
-### read(value, onValue, onError)
+### Result.read(value, onValue, onError)
 
 read the value of `value` even if its within a Result
 
-### coerce(value)
+### Result.coerce(value)
 
 coerce `value` to a Result
 
-### when(result, onValue, onError)
+### Result.when(result, onValue, onError)
 
 transform `value` with `onValue`. If `value` is a "failed" Result it will be passed to `onError` instead
 
-### transfer(a, b)
+### Result.transfer(a, b)
 
   transfer the value of `a` to `b`
 
-### unbox(value)
+### Result.unbox(value)
 
   attempt to unbox a value synchronously
 

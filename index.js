@@ -91,7 +91,7 @@ Result.prototype.yield = function(value){
 }
 
 /**
- * like yeild but throws instead of returning
+ * like yield but throws instead of returning
  *
  * @param {Any} error
  * @return {Result}
