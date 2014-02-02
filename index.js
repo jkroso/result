@@ -45,11 +45,6 @@ inherit(Result, ResultCore)
 
 Result.prototype.then = function(onValue, onError) {
   switch (this.state) {
-    case 'pending':
-      var x = new Result
-      listen(this, '_onValue', handle(x, onValue, 'write', this))
-      listen(this, '_onError', handle(x, onError, 'error', this))
-      return x
     case 'done':
       return typeof onValue == 'function'
         ? run(onValue, this.value, this)
@@ -58,6 +53,12 @@ Result.prototype.then = function(onValue, onError) {
       return typeof onError == 'function'
         ? run(onError, this.value, this)
         : failed(this.value)
+    default:
+      var x = new Result
+      this.listen(
+        handle(x, onValue, 'write', this),
+        handle(x, onError, 'error', this))
+      return x
   }
 }
 
@@ -196,16 +197,8 @@ function handle(result, fn, method, ctx){
   return typeof fn != 'function'
     ? function(x){ return result[method](x) }
     : function(x){
-      try { x = fn.call(ctx, x) }
-      catch (e) { return result.error(e) }
-
-      if (x instanceof ResultType) {
-        x.read(
-          function(v){ result.write(v) },
-          function(e){ result.error(e) })
-      } else {
-        result.write(x)
-      }
+      try { transfer(fn.call(ctx, x), result) }
+      catch (e) { result.error(e) }
     }
 }
 
@@ -234,7 +227,7 @@ function when(value, onValue, onError){
       break
     default:
       var x = new Result
-      value.read(
+      value.listen(
         handle(x, onValue, 'write', this),
         handle(x, onError, 'error', this))
       // unbox if possible
@@ -266,9 +259,16 @@ function read(value, onValue, onError){
  */
 
 function transfer(a, b){
-  read(a,
-    function(val){ b.write(val) },
-    function(err){ b.error(err) })
+  if (a instanceof ResultType) switch (a.state) {
+    case 'done': b.write(a.value); break
+    case 'fail': b.error(a.value); break
+    default:
+      a.listen(
+        function(value){ b.write(value) },
+        function(error){ b.error(error) })
+  } else {
+    b.write(a)
+  }
 }
 
 /**
