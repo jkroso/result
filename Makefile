@@ -4,11 +4,10 @@ serve: node_modules
 
 test: node_modules
 	@node_modules/hydro/bin/hydro test/*.test.js \
+		--formatter $$PWD/node_modules/hydro-dot \
 		--setup test/hydro.conf.js
 
 node_modules: package.json
-	@packin install \
-		--meta deps.json,package.json \
-		--folder node_modules
+	@packin install --meta $< --folder $@
 
 .PHONY: serve test
