@@ -80,13 +80,13 @@ Result.prototype.node = function(fn){
  *
  *   return result.then(function(value){
  *     // some side effect
- *   }).yeild(e)
+ *   }).yield(e)
  *
  * @param  {x} value
  * @return {Result}
  */
 
-Result.prototype.yeild = function(value){
+Result.prototype.yield = function(value){
   return this.then(function(){ return value })
 }
 

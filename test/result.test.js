@@ -125,7 +125,7 @@ describe('.get()', function(){
 
 describe('.yield()', function(){
   it('should always result in a done promise', function(done){
-    Result.failed().yield(1).then(function(n){
+    Result.wrap().yield(1).then(function(n){
       n.should.equal(1)
       done()
     })
