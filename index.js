@@ -1,7 +1,7 @@
 
 var ResultType = require('result-type')
 var ResultCore = require('result-core')
-var listen = ResultCore.addListener
+var listen = ResultCore.prototype.listen
 var inherit = require('inherit')
 
 /**
@@ -225,7 +225,7 @@ function when(value, onValue, onError){
       break
     default:
       var x = new Result
-      value.listen(
+      listen.call(value,
         handle(x, onValue, 'write', this),
         handle(x, onError, 'error', this))
       // unbox if possible
@@ -261,7 +261,7 @@ function transfer(a, b){
     case 'done': b.write(a.value); break
     case 'fail': b.error(a.value); break
     default:
-      a.listen(
+      listen.call(a,
         function(value){ b.write(value) },
         function(error){ b.error(error) })
   } else {
