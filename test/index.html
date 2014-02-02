@@ -7,8 +7,11 @@
 <script>
   var Hydro = require('hydro')
   var hydro = new Hydro
+
   require('./hydro.conf')(hydro)
+
   hydro.set('formatter', require('hydro-html'))
+
   hydro.setup()
 
   require('./result-core.test')

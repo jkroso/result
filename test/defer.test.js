@@ -1,11 +1,8 @@
 
 var defer = require('../defer')
-var chai = require('chai')
 var Result = require('..')
 
-function inc(n){
-  return n + 1
-}
+function inc(n){ return n + 1 }
 
 describe('defer', function(){
   var spy
