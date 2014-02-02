@@ -63,17 +63,6 @@ Result.prototype.then = function(onValue, onError) {
 }
 
 /**
- * use the same `fn` for both `onValue` and `onError`
- *
- * @param  {Function} fn
- * @return {Result}
- */
-
-Result.prototype.always = function(fn){
-  return this.then(fn, fn)
-}
-
-/**
  * read using a node style function
  *
  *   result.node(function(err, value){})
