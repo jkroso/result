@@ -225,7 +225,8 @@ function when(value, onValue, onError){
       break
     default:
       var x = new Result
-      listen.call(value,
+      var fn = value.listen || listen // backwards compat
+      fn.call(value,
         handle(x, onValue, 'write', this),
         handle(x, onError, 'error', this))
       // unbox if possible
@@ -261,7 +262,8 @@ function transfer(a, b){
     case 'done': b.write(a.value); break
     case 'fail': b.error(a.value); break
     default:
-      listen.call(a,
+      var fn = a.listen || listen // backwards compat
+      fn.call(a,
         function(value){ b.write(value) },
         function(error){ b.error(error) })
   } else {

@@ -142,6 +142,20 @@ describe('.throw()', function(){
 })
 
 describe('functions', function(){
+  function Dummy(value){
+    this.state = 'pending'
+    if (value instanceof Error) Result.prototype.error.call(this, value)
+    else if (value != null) Result.prototype.write.call(this, value)
+    this.read = function(a, b){
+      switch (this.state) {
+        case 'done': a(this.value); break
+        case 'fail': b(this.value); break
+        default: Result.prototype.listen.call(this, a, b)
+      }
+    }
+  }
+  inherit(Dummy, ResultType)
+
   describe('when', function(){
     it('should return an unboxed value if possible', function(){
       when(value, function(v){ return v + 1 }).should.equal(2)
@@ -192,6 +206,30 @@ describe('functions', function(){
     it('should not require an onValue function when sync', function(){
       when(1).should.equal(1)
     })
+
+    describe('backwards compat', function(){
+      it('done', function(done){
+        when(new Dummy(1), function(n){
+          n.should.equal(1)
+          done()
+        }, done)
+      })
+
+      it('pending', function(done){
+        var result = new Dummy
+        when(result, function(n){
+          n.should.equal(1)
+          done()
+        })
+        Result.prototype.write.call(result, 1)
+      })
+
+      it('special listen method', function(done){
+        var result = new Dummy
+        result.listen = function(a, b){ a() }
+        when(result, done)
+      })
+    })
   })
 
   describe('unbox', function(){
@@ -216,14 +254,6 @@ describe('functions', function(){
       }).should.throw(/can't unbox a pending result/i)
     })
   })
-
-  function Dummy(value){
-    this.read = function(onValue, onError){
-      if (value instanceof Error) onError(value)
-      else onValue(value)
-    }
-  }
-  inherit(Dummy, ResultType)
 
   describe('read', function(){
     it('should call the onValue function with the value', function(){
@@ -255,7 +285,7 @@ describe('functions', function(){
     })
 
     it('should convert untrusted Results to trusted', function(){
-      coerce(new Dummy).should.be.an.instanceOf(Result)
+      coerce(new Dummy(1)).should.be.an.instanceOf(Result)
     })
 
     it('should extract the value of the untrusted Result', function(){
