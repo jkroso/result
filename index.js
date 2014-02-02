@@ -91,6 +91,17 @@ Result.prototype.yeild = function(value){
 }
 
 /**
+ * like yeild but throws instead of returning
+ *
+ * @param {Any} error
+ * @return {Result}
+ */
+
+Result.prototype['throw'] = function(error){
+  return this.then(function(){ throw error })
+}
+
+/**
  * return a Result for `this[attr]`
  *
  * @param {String} attr

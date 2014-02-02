@@ -123,6 +123,24 @@ describe('.get()', function(){
   })
 })
 
+describe('.yield()', function(){
+  it('should always result in a done promise', function(done){
+    Result.failed().yield(1).then(function(n){
+      n.should.equal(1)
+      done()
+    })
+  })
+})
+
+describe('.throw()', function(){
+  it('should always result in a failed promise', function(done){
+    Result.wrap()['throw'](1).then(null, function(e){
+      e.should.equal(1)
+      done()
+    })
+  })
+})
+
 describe('functions', function(){
   describe('when', function(){
     it('should return an unboxed value if possible', function(){
