@@ -2,6 +2,7 @@
 var ResultType = require('result-type')
 var inherit = require('inherit')
 var Result = require('./index')
+var transfer = Result.transfer
 
 /**
  * Deferred class
@@ -33,17 +34,7 @@ function trigger(method){
     if (this.state === 'awaiting') {
       this.state = 'pending'
       try {
-        var val = this.onNeed()
-        if (val !== undefined) {
-          if (val instanceof ResultType) {
-            var self = this
-            val.read(
-              function(val){ self.write(val) },
-              function(err){ self.error(err) })
-          } else {
-            this.write(val)
-          }
-        }
+        transfer(this.onNeed(), this)
       } catch (e) {
         this.error(e)
       }
@@ -92,17 +83,19 @@ function unawait(method){
 function defer(onNeed){
   switch (onNeed.length) {
     case 2: return new Deferred(function(){
-      var self = this
+      var res = new Result
       onNeed.call(this,
-        function(v){ self.write(v) },
-        function(e){ self.error(e) })
+        function(v){ res.write(v) },
+        function(e){ res.error(e) })
+      return res
     })
     case 1: return new Deferred(function(){
-      var self = this
+      var res = new Result
       onNeed.call(this, function(e, v){
-        if (e != null) self.error(e)
-        else self.write(v)
+        if (e != null) res.error(e)
+        else res.write(v)
       })
+      return res
     })
     default: return new Deferred(onNeed)
   }

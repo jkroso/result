@@ -19,13 +19,14 @@ describe('defer', function(){
     })
 
     it('should return a normal Result', function(){
-      defer(spy).then().constructor.should.equal(Result)
+      defer(spy).then().should.be.instanceOf(Result)
     })
 
     it('should not ever execute `ƒ` twice', function(){
       var result = defer(spy)
       spy.should.not.have.been.called(1)
-      result.then().should.not.equal(result.then())
+      result.then()
+      result.then()
       spy.should.have.been.called(1)
     })
 
@@ -52,14 +53,6 @@ describe('defer', function(){
         }).then(function(val){
           val.should.equal(1)
         }).node(done)
-      })
-
-      it('should not write `undefined`', function(){
-        var result = defer(function(){})
-        result.then(spy)
-        spy.should.not.be.called()
-        result.write(1)
-        spy.should.have.been.called.exactly(1)
       })
     })
   })
