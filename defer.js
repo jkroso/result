@@ -57,22 +57,25 @@ Deferred.prototype.listen = function(onValue, onError){
 
 function defer(onNeed){
   switch (onNeed.length) {
-    case 2: return new Deferred(function(){
-      var res = new Result
-      onNeed.call(this,
-        function(v){ res.write(v) },
-        function(e){ res.error(e) })
-      return res
-    })
-    case 1: return new Deferred(function(){
-      var res = new Result
-      onNeed.call(this, function(e, v){
-        if (e != null) res.error(e)
-        else res.write(v)
+    case 2:
+      return new Deferred(function(){
+        var res = new Result
+        onNeed.call(this,
+          function(v){ res.write(v) },
+          function(e){ res.error(e) })
+        return res
       })
-      return res
-    })
-    default: return new Deferred(onNeed)
+    case 1:
+      return new Deferred(function(){
+        var result = new Result
+        onNeed.call(this, function(error, value){
+          if (error != null) result.error(error)
+          else result.write(value)
+        })
+        return result
+      })
+      default:
+        return new Deferred(onNeed)
   }
 }
 
