@@ -91,17 +91,6 @@ Result.prototype.yield = function(value){
 }
 
 /**
- * like yield but throws instead of returning
- *
- * @param {Any} error
- * @return {Result}
- */
-
-Result.prototype['throw'] = function(error){
-  return this.then(function(){ throw error })
-}
-
-/**
  * return a Result for `this[attr]`
  *
  * @param {String} attr
@@ -109,9 +98,7 @@ Result.prototype['throw'] = function(error){
  */
 
 Result.prototype.get = function(attr){
-  return this.then(function(obj){
-    return obj[attr]
-  })
+  return this.then(function(obj){ return obj[attr] })
 }
 
 /**

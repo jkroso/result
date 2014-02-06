@@ -60,16 +60,6 @@ return result.then(function(value){
 }).yield(e)
 ```
 
-### Result#throw(error)
-
-  like yield but throws instead of returning
-
-```js
-return result.then(function(value){
-  // some side effect
-}).throw(e)
-```
-
 ### Result#get(attr:String)
 
   return a Result for `this[attr]`

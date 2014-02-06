@@ -132,15 +132,6 @@ describe('.yield()', function(){
   })
 })
 
-describe('.throw()', function(){
-  it('should always result in a failed promise', function(done){
-    Result.wrap()['throw'](1).then(null, function(e){
-      e.should.equal(1)
-      done()
-    })
-  })
-})
-
 describe('functions', function(){
   function Dummy(value){
     this.state = 'pending'
