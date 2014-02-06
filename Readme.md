@@ -94,34 +94,16 @@ transform `value` with `onValue`. If `value` is a "failed" Result it will be pas
 
 ### defer(onNeed)
 
-Sometimes your not sure if an expensive to computation is actually going to be required or not. Without any abstraction this forces you to either waste computation or expose a goofy API to consumers of the result. The `defer` function solves this by creating a special type of `Result`, a DeferredResult, which executes a function and assimilates its result the first time someone reads the `DeferredResult`. From the consumers perspective this is just a normal `Result` so no goofy API required.
+Sometimes your not sure if an expensive to computation is actually going to be required or not. Without any abstraction this forces you to either waste computation or expose a goofy API to consumers of the result. The `defer` function solves this by creating a special type of `Result`, a DeferredResult, which executes a function and assimilates its result the first time someone reads the `DeferredResult`. From the consumers perspective this is just a normal `Result` so no goofy API required. For example to represent a GitHub user as an Object we might write:
 
 ```js
-var results = [
-  'duckduckgo.com',
-  'google.com',
-  'bing.com',
-].map(function(engine){
-  return defer(function(){
-    return request(engine + '?q=hello')
+var user = {
+  name: 'jake',
+  handle: 'jkroso',
+  repos: defer(function(){
+    // get list of repos by http
   })
-})
-
-detect(results, function(response){
-  return response.status == 200
-}).read(console.log)
-
-function detect(values, predicate){
-  var result = new Result
-  var i = 0
-  function next(){
-    read(values[i++], function(value){
-      if (predicate(value)) result.write(value)
-      else next()
-    }, error)
-  }
-  function error(e){ result.error(e) }
-  next()
-  return result
 }
 ```
+
+The usual way to represent a user might be to provide methods to access expensive properties like repos. But repos are really just normal data, the API shouldn't change just because they aren't immediately available. And repos would be recomputed each time someone accesses them which is really dumb. Using `DeferredResult`s don't _quite_ give you a normal API but it does get you as close as you could ever hope without language level support. Or wasted computation. See [solicit](//github.com/jkroso/solicit) for another example of how `DeferredResult`s can be useful.
