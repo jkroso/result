@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "reify your results",
   "dependencies": {
-    "next-tick": "timoxley/next-tick",
-    "inherit": "nathan7/inherit",
     "result-type": "1.0.0",
     "result-core": "1.2.0"
   },
   "devDependencies": {
+    "inherit": "nathan7/inherit",
     "serve": "jkroso/serve",
     "chai-spies": "*",
     "hydro-chai": "*",

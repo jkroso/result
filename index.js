@@ -2,7 +2,6 @@
 var ResultType = require('result-type')
 var ResultCore = require('result-core')
 var listen = ResultCore.prototype.listen
-var inherit = require('inherit')
 
 /**
  * expose `Result`
@@ -32,7 +31,7 @@ function Result(){}
  * inherit from ResultCore
  */
 
-inherit(Result, ResultCore)
+Result.prototype = new ResultCore
 
 /**
  * Create a Result for a transformation of the value

@@ -1,6 +1,5 @@
 
 var ResultType = require('result-type')
-var inherit = require('inherit')
 var Result = require('./index')
 var listen = Result.prototype.listen
 var transfer = Result.transfer
@@ -17,9 +16,7 @@ function Deferred(fn){
  * inherit from Result
  */
 
-inherit(Deferred, Result)
-
-Deferred.prototype.called = false
+Deferred.prototype = new Result
 
 /**
  * add a trigger aspect to listen. This aspect ensures
