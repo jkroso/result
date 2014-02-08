@@ -44,14 +44,14 @@ Result.prototype = new ResultCore
 
 Result.prototype.then = function(onValue, onError) {
   switch (this.state) {
+    case 'fail': onValue = onError // fall through
     case 'done':
-      return typeof onValue == 'function'
-        ? run(onValue, this.value, this)
-        : wrap(this.value)
-    case 'fail':
-      return typeof onError == 'function'
-        ? run(onError, this.value, this)
-        : failed(this.value)
+      if (!onValue) return this
+      try {
+        return coerce(onValue.call(this, this.value))
+      } catch (e) {
+        return failed(e)
+      }
     default:
       var x = new Result
       this.listen(
@@ -98,21 +98,6 @@ Result.prototype.yield = function(value){
 
 Result.prototype.get = function(attr){
   return this.then(function(obj){ return obj[attr] })
-}
-
-/**
- * run `value` through `handler` and ensure the result
- * is wrapped in a trusted Result
- *
- * @param {Function} handler
- * @param {x} value
- * @param {Any} ctx
- * @api private
- */
-
-function run(handler, value, ctx){
-  try { return coerce(handler.call(ctx, value)) }
-  catch (e) { return failed(e) }
 }
 
 /**
