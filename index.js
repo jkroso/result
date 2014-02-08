@@ -142,9 +142,14 @@ function coerce(value){
   if (!(value instanceof ResultType)) return wrap(value)
   if (value instanceof Result) return value
   var result = new Result
-  value.read(
-    function(v){ result.write(v) },
-    function(e){ result.error(e) })
+  switch (value.state) {
+    case 'done': result.write(value.value); break
+    case 'fail': result.error(value.value); break
+    default:
+      (value.listen || listen).call(value,
+        function(value){ result.write(value) },
+        function(error){ result.error(error) })
+  }
   return result
 }
 
