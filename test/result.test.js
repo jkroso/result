@@ -132,6 +132,12 @@ describe('.yield()', function(){
   })
 })
 
+describe('.node()', function(){
+  it('should not add a listener if not required', function(){
+    Result.wrap(1).node(null)
+  })
+})
+
 describe('functions', function(){
   function Dummy(value){
     this.state = 'pending'

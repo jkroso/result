@@ -68,11 +68,12 @@ Result.prototype.then = function(onValue, onError) {
  *
  *   result.node(function(err, value){})
  *
- * @param  {Function} callback(error, value)
+ * @param  {Function} [callback(error, value)]
  * @return {this}
  */
 
 Result.prototype.node = function(fn){
+  if (typeof fn != 'function') return this
   return this.read(function(v){ fn(null, v) }, fn)
 }
 
