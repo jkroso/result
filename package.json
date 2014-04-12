@@ -1,6 +1,6 @@
 {
   "name": "result",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "reify your results",
   "dependencies": {
     "result-type": "1.0.0",
