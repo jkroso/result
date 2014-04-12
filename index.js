@@ -15,6 +15,7 @@ module.exports = exports = Result
 
 exports.wrap = exports.done = wrap
 exports.transfer = transfer
+exports.Type = ResultType
 exports.coerce = coerce
 exports.failed = failed
 exports.unbox = unbox
@@ -32,6 +33,7 @@ function Result(){}
  */
 
 Result.prototype = new ResultCore
+Result.prototype.constructor = Result
 
 /**
  * Create a Result for a transformation of the value
