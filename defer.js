@@ -1,5 +1,4 @@
 
-var ResultType = require('result-type')
 var Result = require('./index')
 var listen = Result.prototype.listen
 var transfer = Result.transfer
@@ -17,6 +16,7 @@ function Deferred(fn){
  */
 
 Deferred.prototype = new Result
+Deferred.prototype.constructor = Deferred
 
 /**
  * add a trigger aspect to listen. This aspect ensures
