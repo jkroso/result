@@ -4,9 +4,8 @@
   "description": "reify your results",
   "keywords": ["result", "promise", "future"],
   "dependencies": {
-    "jkroso/result-core": "1.2.0",
-    "jkroso/result-type": "1.0.0",
-    "component/inherit": "0.0.2"
+    "jkroso/result-core": "1.2.1",
+    "jkroso/result-type": "1.0.0"
   },
   "scripts": ["index.js", "defer.js"],
   "license": "MIT"

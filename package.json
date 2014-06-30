@@ -1,10 +1,10 @@
 {
   "name": "result",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "reify your results",
   "dependencies": {
     "result-type": "1.0.0",
-    "result-core": "1.2.0"
+    "result-core": "1.2.1"
   },
   "devDependencies": {
     "inherit": "nathan7/inherit",
@@ -19,7 +19,6 @@
     "chai": "*"
   },
   "repository": "git://github.com/jkroso/result.git",
-  "bugs": "https://github.com/jkroso/result/issues",
   "keywords": ["result", "promise", "future"],
   "author": "Jake Rosoman",
   "license": "MIT",
