@@ -46,7 +46,7 @@ Result.prototype.constructor = Result
 
 Result.prototype.then = function(onValue, onError) {
   switch (this.state) {
-    case 'fail': onValue = onError // fall through
+    case 'fail': onValue = onError // falls through
     case 'done':
       if (!onValue) return this
       try {
