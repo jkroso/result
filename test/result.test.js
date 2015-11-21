@@ -1,26 +1,32 @@
+/* global before */
+import Result,{transfer,coerce,read,when,pending,defer,unbox,failed,wrap} from '..'
+import ResultType from 'result-type'
+import inherit from 'inherit'
+import chai from 'chai'
 
-var ResultType = require('result-type')
-var inherit = require('inherit')
-var Result = require('..')
-var transfer = Result.transfer
-var coerce = Result.coerce
-var read = Result.read
-var when = Result.when
+const delay = value => {
+  var result = pending()
+  setTimeout(() => {
+    if (value instanceof Error) result.error(value)
+    else result.write(value)
+  }, Math.random() * 10)
+  return result
+}
 
-function inc(n){ return n + 1 }
+const inc = n => n + 1
 
 var spy
 var result
-var failed
+var failedResult
 var value
 var error
 var test = 1
 
 before(function(){
-  result = new Result
+  result = pending()
   error = new Error('from test #' + test++)
-  failed = Result.failed(error)
-  value = Result.wrap(1)
+  failedResult = failed(error)
+  value = wrap(1)
   spy = chai.spy()
 })
 
@@ -28,7 +34,7 @@ describe('.read()', function(){
   describe('returning failed results', function(){
     it('when "done"', function(done){
       value.read(function(){
-        return failed
+        return failedResult
       }).read(function(){
         done()
       })
@@ -36,7 +42,7 @@ describe('.read()', function(){
 
     it('when "pending"', function(done){
       result.read(function(){
-        return failed
+        return failedResult
       }).read(done).write()
     })
   })
@@ -52,8 +58,8 @@ describe('.then()', function(){
     it('when "done"', function(done){
       value.then(function(){
         value.should.equal(this)
-        failed.then(null, function(){
-          failed.should.equal(this)
+        failedResult.then(null, function(){
+          failedResult.should.equal(this)
           done()
         })
       })
@@ -62,7 +68,7 @@ describe('.then()', function(){
     it('when "pending"', function(done){
       result.then(function(){
         result.should.equal(this)
-        var fail = new Result
+        var fail = pending()
         fail.then(null, function(){
           fail.should.equal(this)
           done()
@@ -75,7 +81,7 @@ describe('.then()', function(){
 
   describe('error handling', function(){
     it('should propagate failed results', function(){
-      failed.then(inc).read(null, spy)
+      failedResult.then(inc).read(null, spy)
       spy.should.have.been.called.with(error)
     })
 
@@ -88,7 +94,7 @@ describe('.then()', function(){
 
     it('should catch sync error handling errors', function(){
       var error = new Error('test ' + test)
-      failed.then(null, function(){
+      failedResult.then(null, function(){
         throw error
       }).read(null, spy)
       spy.should.have.been.called.with(error)
@@ -105,7 +111,7 @@ describe('.then()', function(){
 
     it('should catch async error handling errors', function(done){
       var error = new Error('test ' + test)
-      failed.then(null, function(){
+      failedResult.then(null, function(){
         return delay(error)
       }).then(null, spy).read(function(){
         spy.should.have.been.called.with(error)
@@ -117,24 +123,16 @@ describe('.then()', function(){
 
 describe('.get()', function(){
   it('should return a Result for a property', function(done){
-    Result.wrap({a:done}).get('a').then(function(done){
-      done()
-    })
+    wrap({a:done}).get('a').then(done => done())
   })
 })
 
 describe('.yield()', function(){
   it('should always result in a done promise', function(done){
-    Result.wrap().yield(1).then(function(n){
+    wrap().yield(1).then(function(n){
       n.should.equal(1)
       done()
     })
-  })
-})
-
-describe('.node()', function(){
-  it('should not add a listener if not required', function(){
-    Result.wrap(1).node(null)
   })
 })
 
@@ -155,40 +153,28 @@ describe('functions', function(){
 
   describe('when', function(){
     it('should return an unboxed value if possible', function(){
-      when(value, function(v){ return v + 1 }).should.equal(2)
-      when(1, function(value){ return value + 1 }).should.equal(2)
+      when(value, inc).should.equal(2)
+      when(1, inc).should.equal(2)
     })
 
     it('should return a new Result otherwise', function(done){
-      when(delay(1), function(n){ return n + 1}).then(function(n){
-        n.should.equal(2)
-      }).node(done)
+      when(delay(1), inc)
+        .then(n => n.should.equal(2))
+        .then(() => done(), done)
     })
 
     it('should propagate rejection', function(){
-      when(failed, null, spy)
+      when(failedResult, null, spy)
       spy.should.have.been.called.with(error)
     })
 
     it('should catch errors on sync operations', function(){
-      when(1, function(){
-        throw new Error('fail')
-      }).read(null, spy)
+      when(1, () => {throw new Error('fail')}).read(null, spy)
       spy.should.have.been.called(1)
     })
 
-    it('should forward `this` to the handlers', function(done){
-      when.call(done, delay(1), function(one){
-        one.should.equal(1)
-        this.should.equal(done)
-        return when.call(done, true, function(){
-          this.should.equal(done)
-        })
-      }).node(done)
-    })
-
     it('should not require an onError function', function(done){
-      when(failed, done).then(null, function(e){
+      when(failedResult, done).then(null, function(e){
         e.should.equal(error)
         done()
       })
@@ -197,51 +183,26 @@ describe('functions', function(){
     it('should not require an onValue function when async', function(done){
       when(delay(1)).then(function(value){
         value.should.equal(1)
-      }).node(done)
+      }).then(() => done())
     })
 
     it('should not require an onValue function when sync', function(){
       when(1).should.equal(1)
     })
-
-    describe('backwards compat', function(){
-      it('done', function(done){
-        when(new Dummy(1), function(n){
-          n.should.equal(1)
-          done()
-        }, done)
-      })
-
-      it('pending', function(done){
-        var result = new Dummy
-        when(result, function(n){
-          n.should.equal(1)
-          done()
-        })
-        Result.prototype.write.call(result, 1)
-      })
-
-      it('special listen method', function(done){
-        var result = new Dummy
-        result.listen = function(a, b){ a() }
-        when(result, done)
-      })
-    })
   })
 
   describe('unbox', function(){
-    var unbox = Result.unbox
     it('should return a plain value', function(){
       unbox(1).should.equal(1)
     })
 
     it('should unbox a "done" result', function(){
-      unbox(Result.wrap(1)).should.equal(1)
+      unbox(wrap(1)).should.equal(1)
     })
 
     it('should throw a "fail" result', function(){
       (function(){
-        unbox(failed)
+        unbox(failedResult)
       }).should.throw(error)
     })
 
@@ -264,7 +225,7 @@ describe('functions', function(){
     })
 
     it('should handle "failed" results', function(){
-      read(failed, null, spy)
+      read(failedResult, null, spy)
       spy.should.have.been.called.with(error)
     })
 
@@ -298,7 +259,7 @@ describe('functions', function(){
 
   describe('transfer', function(){
     it('should transfer eventual results', function(done){
-      var b = new Result
+      var b = pending()
       transfer(delay(1), b)
       b.read(function(val){
         val.should.equal(1)
@@ -307,7 +268,7 @@ describe('functions', function(){
     })
 
     it('should transfer eventual errors', function(done){
-      var b = new Result
+      var b = pending()
       transfer(delay(error), b)
       b.read(null, function(e){
         error.should.equal(e)
@@ -316,10 +277,122 @@ describe('functions', function(){
     })
 
     it('should transfer immediate values', function(done){
-      var b = new Result
+      var b = pending()
       transfer(1, b)
       b.read(function(val){
         val.should.equal(1)
+        done()
+      })
+    })
+  })
+})
+
+describe('defer', function(){
+  var spy
+  before(function(){
+    spy = chai.spy()
+  })
+
+  describe('then()', function(){
+    it('should execute `ƒ` if `this` is "awaiting"', function(){
+      var result = defer(spy)
+      spy.should.not.have.been.called(1)
+      result.then()
+      spy.should.have.been.called(1)
+    })
+
+    it('should return a normal Result', function(){
+      defer(spy).then().should.be.instanceOf(Result)
+    })
+
+    it('should not ever execute `ƒ` twice', function(){
+      var result = defer(spy)
+      spy.should.not.have.been.called(1)
+      result.then()
+      result.then()
+      spy.should.have.been.called(1)
+    })
+
+    it('should propagate values', function(done){
+      defer((write, error) => write(1))
+        .then(inc)
+        .then(n => n.should.equal(2))
+        .then(()=>done(), done)
+    })
+
+    describe('return values', function(){
+      it('async', function(done){
+        defer(()=> delay(1))
+          .then(val => val.should.equal(1))
+          .then(()=>done(), done)
+      })
+
+      it('sync', function(done){
+        defer(()=> 1)
+          .then(val=> val.should.equal(1))
+          .then(()=>done(), done)
+      })
+    })
+  })
+
+  describe('read()', function(){
+    it('should execute `ƒ` if `this` is "awaiting"', function(){
+      var result = defer(spy)
+      spy.should.not.have.been.called(1)
+      result.read()
+      spy.should.have.been.called(1)
+    })
+  })
+
+  describe('write()', function(){
+    it('should work even if the deferred has\'t been needed', function(done){
+      var result = defer(spy)
+      result.write(1)
+      result.read(function(){
+        spy.should.not.have.been.called
+        done()
+      })
+    })
+  })
+
+  describe('error()', function(){
+    it('should work even if the deferred has\'t been needed', function(done){
+      var result = defer(spy)
+      result.error(1)
+      result.read(null, function(){
+        spy.should.not.have.been.called
+        done()
+      })
+    })
+  })
+
+  describe('error handling', function(){
+    it('should catch sync errors', function(){
+      var error = new Error('boom')
+      defer(() =>{ throw error }).then(null, spy)
+      spy.should.have.been.called.with(error)
+    })
+
+    it('should catch async errors', function(done){
+      var error = new Error('boom')
+      defer(()=> delay(error))
+        .then(null, e => {
+          e.should.equal(error)
+          done()
+        })
+    })
+  })
+
+  it('should support standard cb API\'s', function(done){
+    var error = new Error('boom')
+    defer(function(cb){
+      cb(error)
+    }).read(null, function(e){
+      e.should.equal(error)
+      defer(function(cb){
+        cb(null, 1)
+      }).read(function(n){
+        n.should.equal(1)
         done()
       })
     })

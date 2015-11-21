@@ -9,6 +9,7 @@
   "devDependencies": {
     "inherit": "nathan7/inherit",
     "serve": "jkroso/serve",
+    "babel-core": "5",
     "chai-spies": "*",
     "hydro-chai": "*",
     "hydro-html": "*",
@@ -18,6 +19,7 @@
     "tryc": "*",
     "chai": "*"
   },
+  "transpile": [["*.js", "!sourcegraph/babel->js", {"stage": 0}]],
   "repository": "git://github.com/jkroso/result.git",
   "keywords": ["result", "promise", "future"],
   "author": "Jake Rosoman",

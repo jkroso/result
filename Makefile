@@ -1,13 +1,12 @@
-
 serve: node_modules
 	@node_modules/serve/bin/serve -Slojp 0
 
 test: node_modules
-	@node_modules/hydro/bin/hydro test/*.test.js \
-		--formatter $$PWD/node_modules/hydro-dot \
+	@node_modules/hydro/bin/_hydro test/*.test.js \
+		--formatter $</hydro-dot \
 		--setup test/hydro.conf.js
 
 node_modules: package.json
-	@packin install --meta $< --folder $@
+	@npm install
 
 .PHONY: serve test

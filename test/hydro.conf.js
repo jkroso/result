@@ -1,6 +1,3 @@
-
-var Result = require('..')
-
 /**
  * Hydro configuration
  *
@@ -8,6 +5,9 @@ var Result = require('..')
  */
 
 module.exports = function(hydro) {
+  require('babel-core/register')({
+    extensions: ['.js']
+  })
   hydro.set({
     suite: 'result',
     plugins: [
@@ -19,19 +19,6 @@ module.exports = function(hydro) {
       plugins: [ require('chai-spies') ],
       styles: ['should'],
       stack: true
-    },
-    globals: {
-      chai: require('chai'),
-      delay: delay
     }
   })
-}
-
-function delay(value){
-  var result = new Result
-  setTimeout(function () {
-    if (value instanceof Error) result.error(value)
-    else result.write(value)
-  }, Math.random() * 10)
-  return result
 }

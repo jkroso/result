@@ -7,17 +7,12 @@ A big problem arises when your programs input comes from outside of memory thoug
 
 ## Installation
 
-With your favourite package manager:
-
-- [packin](//github.com/jkroso/packin): `packin add result`
-- [component](//github.com/component/component#installing-packages): `component install jkroso/result`
-- [npm](//npmjs.org/doc/cli/npm-install.html): `npm install result`
+`npm install result`
 
 then in your app:
 
 ```js
-var Result = require('result')
-var defer = require('result/defer')
+import Result from 'result'
 ```
 
 ## API

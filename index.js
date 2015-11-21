@@ -1,38 +1,16 @@
-
-var ResultType = require('result-type')
-var ResultCore = require('result-core')
-var listen = ResultCore.prototype.listen
-
-/**
- * expose `Result`
- */
-
-module.exports = exports = Result
-
-/**
- * expose helpers
- */
-
-exports.wrap = exports.done = wrap
-exports.transfer = transfer
-exports.Type = ResultType
-exports.coerce = coerce
-exports.failed = failed
-exports.unbox = unbox
-exports.when = when
-exports.read = read
+import ResultType from 'result-type'
+import ResultCore from 'result-core'
 
 /**
  * the Result class
  */
 
-function Result(){}
+export default function Result(state, value) {
+  this.state = state
+  this.value = value
+}
 
-/**
- * inherit from ResultCore
- */
-
-Result.prototype = new ResultCore
+Result.prototype = Object.create(ResultCore.prototype)
 Result.prototype.constructor = Result
 
 /**
@@ -55,7 +33,7 @@ Result.prototype.then = function(onValue, onError) {
         return failed(e)
       }
     default:
-      var x = new Result
+      var x = pending()
       this.listen(
         handle(x, onValue, 'write', this),
         handle(x, onError, 'error', this))
@@ -64,22 +42,7 @@ Result.prototype.then = function(onValue, onError) {
 }
 
 /**
- * read using a node style function
- *
- *   result.node(function(err, value){})
- *
- * @param  {Function} [callback(error, value)]
- * @return {this}
- */
-
-Result.prototype.node = function(fn){
-  if (typeof fn != 'function') return this
-  return this.read(function(v){ fn(null, v) }, fn)
-}
-
-/**
  * Create a child Result destined to fulfill with `value`
- *
  *   return result.then(function(value){
  *     // some side effect
  *   }).yield(e)
@@ -88,8 +51,8 @@ Result.prototype.node = function(fn){
  * @return {Result}
  */
 
-Result.prototype.yield = function(value){
-  return this.then(function(){ return value })
+Result.prototype.yield = function(value) {
+  return this.then(() => value)
 }
 
 /**
@@ -99,8 +62,8 @@ Result.prototype.yield = function(value){
  * @return {Result}
  */
 
-Result.prototype.get = function(attr){
-  return this.then(function(obj){ return obj[attr] })
+Result.prototype.get = function(attr) {
+  return this.then(obj => obj[attr])
 }
 
 /**
@@ -111,12 +74,7 @@ Result.prototype.get = function(attr){
  * @api public
  */
 
-function failed(reason){
-  var res = new Result
-  res.value = reason
-  res.state = 'fail'
-  return res
-}
+export const failed = reason => new Result('fail', reason)
 
 /**
  * wrap `value` in a "done" Result
@@ -126,12 +84,13 @@ function failed(reason){
  * @api public
  */
 
-function wrap(value){
-  var res = new Result
-  res.value = value
-  res.state = 'done'
-  return res
-}
+export const wrap = value => new Result('done', value)
+
+/**
+ * A pending Result
+ */
+
+export const pending = () => new Result('pending')
 
 /**
  * coerce `value` to a Result
@@ -141,18 +100,17 @@ function wrap(value){
  * @api public
  */
 
-function coerce(value){
+export const coerce = value => {
   if (!(value instanceof ResultType)) return wrap(value)
   if (value instanceof Result) return value
-  var result = new Result
   switch (value.state) {
-    case 'done': result.write(value.value); break
-    case 'fail': result.error(value.value); break
-    default:
-      (value.listen || listen).call(value,
-        function(value){ result.write(value) },
-        function(error){ result.error(error) })
+    case 'done': return wrap(value.value)
+    case 'fail': return failed(value.value)
   }
+  var result = pending()
+  value.listen(
+    value => result.write(value),
+    error => result.error(error))
   return result
 }
 
@@ -165,19 +123,17 @@ function coerce(value){
  * @param {Function} result
  * @param {Function} fn
  * @param {String} method
- * @param {Any} [ctx]
  * @return {Function}
  * @api private
  */
 
-function handle(result, fn, method, ctx){
-  return typeof fn != 'function'
-    ? function(x){ return result[method](x) }
-    : function(x){
+const handle = (result, fn, method, ctx) =>
+  typeof fn != 'function'
+    ? x => result[method](x)
+    : x => {
       try { transfer(fn.call(ctx, x), result) }
       catch (e) { result.error(e) }
     }
-}
 
 /**
  * run `value` through `onValue`. If `value` is a
@@ -192,7 +148,7 @@ function handle(result, fn, method, ctx){
  * @return {Any}
  */
 
-function when(value, onValue, onError){
+export const when = (value, onValue, onError) => {
   if (value instanceof ResultType) switch (value.state) {
     case 'fail':
       if (!onError) return value
@@ -203,17 +159,15 @@ function when(value, onValue, onError){
       value = value.value
       break
     default:
-      var x = new Result
-      var fn = value.listen || listen // backwards compat
-      fn.call(value,
-        handle(x, onValue, 'write', this),
-        handle(x, onError, 'error', this))
+      var x = pending()
+      value.listen(handle(x, onValue, 'write'),
+                   handle(x, onError, 'error'))
       // unbox if possible
       return x.state == 'done' ? x.value : x
   }
   if (!onValue) return value
-  try { return onValue.call(this, value)  }
-  catch (e) { return failed.call(this, e) }
+  try { return onValue(value) }
+  catch (e) { return failed(e) }
 }
 
 /**
@@ -224,7 +178,7 @@ function when(value, onValue, onError){
  * @param {Function} onError
  */
 
-function read(value, onValue, onError){
+export const read = (value, onValue, onError) => {
   if (value instanceof ResultType) value.read(onValue, onError)
   else onValue(value)
 }
@@ -236,15 +190,12 @@ function read(value, onValue, onError){
  * @param {Result} b
  */
 
-function transfer(a, b){
+export const transfer = (a, b) => {
   if (a instanceof ResultType) switch (a.state) {
     case 'done': b.write(a.value); break
     case 'fail': b.error(a.value); break
     default:
-      var fn = a.listen || listen // backwards compat
-      fn.call(a,
-        function(value){ b.write(value) },
-        function(error){ b.error(error) })
+      a.listen(value => b.write(value), error => b.error(error))
   } else {
     b.write(a)
   }
@@ -259,9 +210,82 @@ function transfer(a, b){
  * @throws {Any} If given a failed result
  */
 
-function unbox(value){
+export const unbox = value => {
   if (!(value instanceof ResultType)) return value
   if (value.state == 'done') return value.value
   if (value.state == 'fail') throw value.value
   throw new Error('can\'t unbox a pending result')
+}
+
+/**
+ * Deferred class
+ */
+
+export function Deferred(fn){
+  this.onNeed = fn
+  this.state = 'pending'
+  this.value = undefined
+}
+
+/**
+ * inherit from Result
+ */
+
+Deferred.prototype = Object.create(Result.prototype)
+Deferred.prototype.constructor = Deferred
+
+/**
+ * add a trigger aspect to listen. This aspect ensures
+ * `onNeed` is called the first time someone reads from
+ * the Deferred result
+ *
+ * @param {Function} method
+ * @return {Function}
+ * @api private
+ */
+
+Deferred.prototype.listen = function(onValue, onError){
+  Result.prototype.listen.call(this, onValue, onError)
+  if (this.called) return
+  this.called = true
+  try {
+    transfer(this.onNeed(), this)
+  } catch (e) {
+    this.error(e)
+  }
+}
+
+/**
+ * create a Deferred which is associated with the
+ * Function `onNeed`. `onNeed` will only be called
+ * once someone actually reads from the Deferred.
+ *
+ *   defer(function(){ return 'hello' })
+ *   defer(function(cb){ cb(null, 'hello') })
+ *   defer(function(write, error){ write('hello') })
+ *
+ * @param {Function} onNeed(write, error)
+ * @return {Deferred}
+ */
+
+export const defer = onNeed => {
+  switch (onNeed.length) {
+    case 2:
+      return new Deferred(function(){
+        var res = pending()
+        onNeed.call(this, v => res.write(v), e => res.error(e))
+        return res
+      })
+    case 1:
+      return new Deferred(function(){
+        var result = pending()
+        onNeed.call(this, (error, value) => {
+          if (error != null) result.error(error)
+          else result.write(value)
+        })
+        return result
+      })
+    default:
+      return new Deferred(onNeed)
+  }
 }

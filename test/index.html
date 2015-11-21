@@ -1,4 +1,3 @@
-
 <title>result tests</title>
 <link rel="stylesheet" href="../node_modules/hydro-html/index.css">
 
@@ -14,11 +13,7 @@
 
   hydro.setup()
 
-  require('./result-core.test')
   require('./result.test')
-  require('./defer.test')
 
-  hydro.run(function(err){
-    if (err) throw err
-  })
+  hydro.run()
 </script>
