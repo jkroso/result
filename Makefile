@@ -1,8 +1,8 @@
 serve: node_modules
-	@node_modules/serve/bin/serve -Slojp 0
+	@$</.bin/serve -Slojp 0
 
 test: node_modules
-	@node_modules/hydro/bin/_hydro test/*.test.js \
+	@$</.bin/_hydro test/*.test.js \
 		--formatter $</hydro-dot \
 		--setup test/hydro.conf.js
 

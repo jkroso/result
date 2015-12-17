@@ -1,70 +1,61 @@
 import ResultType from 'result-type'
 import ResultCore from 'result-core'
 
-/**
- * the Result class
- */
+export default class Result extends ResultCore {
+  /**
+  * Create a Result for a transformation of the value
+  * of `this` Result
+  *
+  * @param  {Function} onValue
+  * @param  {Function} onError
+  * @return {Result}
+  */
 
-export default function Result(state, value) {
-  this.state = state
-  this.value = value
-}
+  then(onValue, onError) {
+    switch (this.state) {
+      case 'fail': onValue = onError // falls through
+      case 'done':
+        if (!onValue) return this
+        try {
+          return coerce(onValue.call(this, this.value))
+        } catch (e) {
+          return failed(e)
+        }
+      default:
+        var x = pending()
+        this.listen(
+          handle(x, onValue, 'write', this),
+          handle(x, onError, 'error', this))
+        return x
+    }
+  }
 
-Result.prototype = Object.create(ResultCore.prototype)
-Result.prototype.constructor = Result
+  /**
+  * Create a child Result destined to fulfill with `value`
+  *   return result.then(function(value){
+  *     // some side effect
+  *   }).yield(e)
+  *
+  * @param  {x} value
+  * @return {Result}
+  */
 
-/**
- * Create a Result for a transformation of the value
- * of `this` Result
- *
- * @param  {Function} onValue
- * @param  {Function} onError
- * @return {Result}
- */
+  yield(value) {
+    return this.then(() => value)
+  }
 
-Result.prototype.then = function(onValue, onError) {
-  switch (this.state) {
-    case 'fail': onValue = onError // falls through
-    case 'done':
-      if (!onValue) return this
-      try {
-        return coerce(onValue.call(this, this.value))
-      } catch (e) {
-        return failed(e)
-      }
-    default:
-      var x = pending()
-      this.listen(
-        handle(x, onValue, 'write', this),
-        handle(x, onError, 'error', this))
-      return x
+  /**
+  * return a Result for `this[attr]`
+  *
+  * @param {String} attr
+  * @return {Result}
+  */
+
+  get(attr) {
+    return this.then(obj => obj[attr])
   }
 }
 
-/**
- * Create a child Result destined to fulfill with `value`
- *   return result.then(function(value){
- *     // some side effect
- *   }).yield(e)
- *
- * @param  {x} value
- * @return {Result}
- */
-
-Result.prototype.yield = function(value) {
-  return this.then(() => value)
-}
-
-/**
- * return a Result for `this[attr]`
- *
- * @param {String} attr
- * @return {Result}
- */
-
-Result.prototype.get = function(attr) {
-  return this.then(obj => obj[attr])
-}
 
 /**
  * wrap `reason` in a "failed" result
@@ -221,37 +212,33 @@ export const unbox = value => {
  * Deferred class
  */
 
-export function Deferred(fn){
-  this.onNeed = fn
-  this.state = 'pending'
-  this.value = undefined
-}
+export class Deferred extends Result {
+  constructor(fn){
+    super('pending')
+    this.onNeed = fn
+    this.needed = false
+  }
 
-/**
- * inherit from Result
- */
+  /**
+  * add a trigger aspect to listen. This aspect ensures
+  * `onNeed` is called the first time someone reads from
+  * the Deferred result
+  *
+  * @param {Function} method
+  * @return {Function}
+  * @api private
+  */
 
-Deferred.prototype = Object.create(Result.prototype)
-Deferred.prototype.constructor = Deferred
-
-/**
- * add a trigger aspect to listen. This aspect ensures
- * `onNeed` is called the first time someone reads from
- * the Deferred result
- *
- * @param {Function} method
- * @return {Function}
- * @api private
- */
-
-Deferred.prototype.listen = function(onValue, onError){
-  Result.prototype.listen.call(this, onValue, onError)
-  if (this.called) return
-  this.called = true
-  try {
-    transfer(this.onNeed(), this)
-  } catch (e) {
-    this.error(e)
+  listen(onValue, onError) {
+    super.listen(onValue, onError)
+    if (this.needed === false) {
+      this.needed = true
+      try {
+        transfer(this.onNeed(), this)
+      } catch (e) {
+        this.error(e)
+      }
+    }
   }
 }
 
@@ -260,9 +247,9 @@ Deferred.prototype.listen = function(onValue, onError){
  * Function `onNeed`. `onNeed` will only be called
  * once someone actually reads from the Deferred.
  *
- *   defer(function(){ return 'hello' })
- *   defer(function(cb){ cb(null, 'hello') })
- *   defer(function(write, error){ write('hello') })
+ *   defer(() => 'hello')
+ *   defer((cb) => cb(null, 'hello'))
+ *   defer((write, error) => write('hello'))
  *
  * @param {Function} onNeed(write, error)
  * @return {Deferred}
@@ -272,13 +259,13 @@ export const defer = onNeed => {
   switch (onNeed.length) {
     case 2:
       return new Deferred(function(){
-        var res = pending()
+        const res = pending()
         onNeed.call(this, v => res.write(v), e => res.error(e))
         return res
       })
     case 1:
       return new Deferred(function(){
-        var result = pending()
+        const result = pending()
         onNeed.call(this, (error, value) => {
           if (error != null) result.error(error)
           else result.write(value)

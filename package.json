@@ -1,15 +1,15 @@
 {
   "name": "result",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "reify your results",
   "dependencies": {
-    "result-type": "1.0.0",
-    "result-core": "1.2.1"
+    "result-type": "1",
+    "result-core": "2"
   },
   "devDependencies": {
     "inherit": "nathan7/inherit",
     "serve": "jkroso/serve",
-    "babel-core": "5",
+    "future-node": "0",
     "chai-spies": "*",
     "hydro-chai": "*",
     "hydro-html": "*",
