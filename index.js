@@ -22,7 +22,7 @@ export default class Result extends ResultCore {
           return failed(e)
         }
       default:
-        var x = pending()
+        const x = pending()
         this.listen(
           handle(x, onValue, 'write', this),
           handle(x, onError, 'error', this))
@@ -92,16 +92,23 @@ export const pending = () => new Result('pending')
  */
 
 export const coerce = value => {
-  if (!(value instanceof ResultType)) return wrap(value)
+  if (!(value instanceof ResultType)) {
+    if (value instanceof Promise) {
+      const result = pending()
+      value.then(value => result.write(value),
+                 error => result.error(error))
+      return result
+    }
+    return wrap(value)
+  }
   if (value instanceof Result) return value
   switch (value.state) {
     case 'done': return wrap(value.value)
     case 'fail': return failed(value.value)
   }
-  var result = pending()
-  value.listen(
-    value => result.write(value),
-    error => result.error(error))
+  const result = pending()
+  value.listen(value => result.write(value),
+               error => result.error(error))
   return result
 }
 
@@ -150,7 +157,7 @@ export const when = (value, onValue, onError) => {
       value = value.value
       break
     default:
-      var x = pending()
+      const x = pending()
       value.listen(handle(x, onValue, 'write'),
                    handle(x, onError, 'error'))
       // unbox if possible

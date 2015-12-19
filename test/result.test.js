@@ -255,6 +255,14 @@ describe('functions', function(){
       coerce(new Dummy(new Error(1))).read(null, spy)
       spy.should.have.been.called.with(new Error(1))
     })
+
+    it('should convert native promises', function(done){
+      const a = Promise.resolve(1)
+      coerce(a).read(n => {
+        n.should.equal(1)
+        done()
+      }, done)
+    })
   })
 
   describe('transfer', function(){
