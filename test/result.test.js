@@ -1,5 +1,5 @@
 /* global before */
-import Result,{transfer,coerce,read,when,pending,defer,unbox,failed,wrap} from '..'
+import Result,{transfer,coerce,read,when,pending,defer,unbox,failed,wrap,softUnbox} from '..'
 import ResultType from 'result-type'
 import inherit from 'inherit'
 import chai from 'chai'
@@ -208,8 +208,29 @@ describe('functions', function(){
 
     it('should throw on a "pending" result', function(){
       (function(){
-        unbox(new Result)
+        unbox(new Result('pending'))
       }).should.throw(/can't unbox a pending result/i)
+    })
+  })
+
+  describe('softUnbox', function(){
+    it('should return a plain value', function(){
+      softUnbox(1).should.equal(1)
+    })
+
+    it('should unbox a "done" result', function(){
+      softUnbox(wrap(1)).should.equal(1)
+    })
+
+    it('should throw a "fail" result', function(){
+      (function(){
+        softUnbox(failedResult)
+      }).should.throw(error)
+    })
+
+    it('should return a "pending" result', function(){
+      const p = new Result('pending')
+      softUnbox(p).should.equal(p)
     })
   })
 

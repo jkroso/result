@@ -200,7 +200,8 @@ export const transfer = (a, b) => {
 }
 
 /**
- * attempt to unbox a value synchronously
+ * attempt to unbox a value synchronously if it can't be done because
+ * the result is "pending" then an error will be thrown
  *
  * @param {Any} value
  * @return {Any}
@@ -213,6 +214,23 @@ export const unbox = value => {
   if (value.state == 'done') return value.value
   if (value.state == 'fail') throw value.value
   throw new Error('can\'t unbox a pending result')
+}
+
+/**
+ * attempt to unbox a value. If it's a "pending" result then it will
+ * just be returned as is
+ *
+ * @param {Any} value
+ * @return {Any}
+ * @throws {Error} If given a pending result
+ * @throws {Any} If given a failed result
+ */
+
+export const softUnbox = value => {
+  if (!(value instanceof ResultType)) return value
+  if (value.state == 'done') return value.value
+  if (value.state == 'fail') throw value.value
+  return value
 }
 
 /**
