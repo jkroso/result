@@ -243,6 +243,7 @@ export const softUnbox = value => {
 
 export const liftall = value => {
   if (value instanceof Result) return when(value, liftall)
+  if (value instanceof Promise) return when(coerce(value), liftall)
   const fn = liftall[type(value)]
   return fn ? fn(value) : value
 }

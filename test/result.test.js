@@ -449,6 +449,13 @@ describe('liftall', () => {
     result.write(1)
   })
 
+  it('native promises', (done) => {
+    when(liftall(Promise.resolve(1)), (value) => {
+      value.should.eql(1)
+      done()
+    }, done)
+  })
+
   it('deep', (done) => {
     const data = {a: pending()}
     when(liftall(data), (lifted) => {
