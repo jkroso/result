@@ -1,5 +1,5 @@
 /* global before */
-import Result,{transfer,coerce,read,when,pending,defer,unbox,failed,wrap,softUnbox} from '..'
+import Result,{transfer,coerce,read,when,pending,defer,unbox,failed,wrap,softUnbox,liftall} from '..'
 import ResultType from 'result-type'
 import inherit from 'inherit'
 import chai from 'chai'
@@ -425,5 +425,36 @@ describe('defer', function(){
         done()
       })
     })
+  })
+})
+
+describe('liftall', () => {
+  it('objects', (done) => {
+    liftall({}).should.eql({})
+    liftall({a:value}).should.eql({a:1})
+    when(liftall({a:result}), (object) => {
+      object.should.eql({a:1})
+      done()
+    }, done)
+    result.write(1)
+  })
+
+  it('arrays', (done) => {
+    liftall([]).should.eql([])
+    liftall([value]).should.eql([1])
+    when(liftall([result]), (array) => {
+      array.should.eql([1])
+      done()
+    }, done)
+    result.write(1)
+  })
+
+  it('deep', (done) => {
+    const data = {a: pending()}
+    when(liftall(data), (lifted) => {
+      lifted.should.eql({a:[1]})
+      done()
+    }, done)
+    data.a.write([value])
   })
 })

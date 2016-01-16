@@ -1,5 +1,3 @@
-if (typeof window == 'undefined') require('future-node')
-
 /**
  * Hydro configuration
  *

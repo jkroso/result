@@ -1,5 +1,6 @@
 import ResultType from 'result-type'
 import ResultCore from 'result-core'
+import type from '@jkroso/type'
 
 export default class Result extends ResultCore {
   /**
@@ -232,6 +233,35 @@ export const softUnbox = value => {
   if (value.state == 'fail') throw value.value
   return value
 }
+
+/**
+ * Unbox all nested promises in a data structure
+ *
+ * @param {Any} value
+ * @return {Any} a copy of `value`
+ */
+
+export const liftall = value => {
+  if (value instanceof Result) return when(value, liftall)
+  const fn = liftall[type(value)]
+  return fn ? fn(value) : value
+}
+
+liftall.object = value =>
+  Object.keys(value).reduce((copy,key) =>
+    when(copy, copy =>
+      when(liftall(value[key]), value => {
+        copy[key] = value
+        return copy
+      })), Object.create(value))
+
+liftall.array = values =>
+  values.reduce((result, value) =>
+    when(result, array =>
+      when(liftall(value), (value) => {
+        array.push(value)
+        return array
+      })), [])
 
 /**
  * Deferred class
