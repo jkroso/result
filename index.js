@@ -94,13 +94,9 @@ export const pending = () => new Result('pending')
 
 export const coerce = value => {
   if (!(value instanceof ResultType)) {
-    if (value instanceof Promise) {
-      const result = pending()
-      value.then(value => result.write(value),
-                 error => result.error(error))
-      return result
-    }
-    return wrap(value)
+    return value instanceof Promise
+      ? coercePromise(value)
+      : wrap(value)
   }
   if (value instanceof Result) return value
   switch (value.state) {
@@ -109,6 +105,13 @@ export const coerce = value => {
   }
   const result = pending()
   value.listen(value => result.write(value),
+               error => result.error(error))
+  return result
+}
+
+export const coercePromise = promise => {
+  const result = pending()
+  promise.then(value => result.write(value),
                error => result.error(error))
   return result
 }
@@ -243,7 +246,7 @@ export const softUnbox = value => {
 
 export const liftall = value => {
   if (value instanceof Result) return when(value, liftall)
-  if (value instanceof Promise) return when(coerce(value), liftall)
+  if (value instanceof Promise) return when(coercePromise(value), liftall)
   const fn = liftall[type(value)]
   return fn ? fn(value) : value
 }
