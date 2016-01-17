@@ -94,7 +94,8 @@ export const pending = () => new Result('pending')
 
 export const coerce = value => {
   if (!(value instanceof ResultType)) {
-    return value instanceof Promise
+    // thanks to babel `x instanceof Promise` is unreliable
+    return value && typeof value.then == 'function'
       ? coercePromise(value)
       : wrap(value)
   }
