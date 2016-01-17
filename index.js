@@ -95,7 +95,7 @@ export const pending = () => new Result('pending')
 export const coerce = value => {
   if (!(value instanceof ResultType)) {
     // thanks to babel `x instanceof Promise` is unreliable
-    return value && typeof value.then == 'function'
+    return isPromise(value)
       ? coercePromise(value)
       : wrap(value)
   }
@@ -199,10 +199,14 @@ export const transfer = (a, b) => {
     case 'fail': b.error(a.value); break
     default:
       a.listen(value => b.write(value), error => b.error(error))
+  } else if (isPromise(a)) {
+    a.then(value => b.write(value), error => b.error(error))
   } else {
     b.write(a)
   }
 }
+
+const isPromise = value => value && typeof value.then == 'function'
 
 /**
  * attempt to unbox a value synchronously if it can't be done because

@@ -119,6 +119,13 @@ describe('.then()', function(){
       })
     })
   })
+
+  it('native promise support', (done) => {
+    wrap(0).then(() => Promise.resolve(1)).read(value => {
+      value.should.equal(1)
+      done()
+    }, done)
+  })
 })
 
 describe('.get()', function(){
