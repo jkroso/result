@@ -1,6 +1,6 @@
 {
   "name": "result",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "reify your results",
   "dependencies": {
     "@jkroso/type": "1",

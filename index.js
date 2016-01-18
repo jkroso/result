@@ -243,6 +243,11 @@ export const softUnbox = value => {
   return value
 }
 
+const memoize = fn => (value, seen=new Map) => {
+  if (seen.has(value)) return seen.get(value)
+  return fn(value, seen)
+}
+
 /**
  * Unbox all nested promises in a data structure
  *
@@ -250,28 +255,34 @@ export const softUnbox = value => {
  * @return {Any} a copy of `value`
  */
 
-export const liftall = value => {
-  if (value instanceof Result) return when(value, liftall)
-  if (value instanceof Promise) return when(coercePromise(value), liftall)
+export const liftall = memoize((value, seen) => {
+  if (value instanceof Result) return value.then(v => liftall(v, seen))
+  if (isPromise(value)) return when(coercePromise(value), v => liftall(v, seen))
   const fn = liftall[type(value)]
-  return fn ? fn(value) : value
-}
+  return fn ? fn(value, seen) : value
+})
 
-liftall.object = value =>
-  Object.keys(value).reduce((copy,key) =>
+liftall.object = (value, seen) => {
+  const copy = Object.create(value)
+  seen.set(value, copy)
+  return Object.keys(value).reduce((copy, key) =>
     when(copy, copy =>
-      when(liftall(value[key]), value => {
+      when(liftall(value[key], seen), value => {
         copy[key] = value
         return copy
-      })), Object.create(value))
+      })), copy)
+}
 
-liftall.array = values =>
-  values.reduce((result, value) =>
-    when(result, array =>
-      when(liftall(value), (value) => {
-        array.push(value)
-        return array
-      })), [])
+liftall.array = (values, seen) => {
+  const copy = new Array(values.length)
+  seen.set(values, copy)
+  return values.reduce((copy, value, index) =>
+    when(copy, copy =>
+      when(liftall(value, seen), value => {
+        copy[index] = value
+        return copy
+      })), copy)
+}
 
 /**
  * Deferred class
